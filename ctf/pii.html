@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PII Investigation</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Social Feed Styles */
+        .social-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .social-post {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .social-post img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/logo-color.png" alt="AWSN Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="pii.html" class="active">PII Investigation</a></li>
+                <li><a href="ctf.html">CTF Challenges</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="module-content">
+            <h1>Personal Information Investigation (PII)</h1>
+            <p class="module-description">
+                Learn about personal information security and privacy through hands-on investigation exercises.
+            </p>
+
+            <div class="content-sections">
+
+                <section id="osint" class="content-section">
+                    <h2>OSINT Challenge</h2>
+                    <div class="section-content">
+                        <p>
+                            Practice Open Source Intelligence (OSINT) techniques to understand how publicly available 
+                            information can be used to build detailed profiles. Learn about the importance of managing 
+                            your digital presence and protecting sensitive information.
+                        </p>
+                        <div class="challenge-steps">
+                            <h3>Challenge Overview</h3>
+                            <ul>
+                                <li>Where in the world is this image taken?</li>
+                                <li>Provide the address and GPS Coordinates</li>
+                            </ul>
+                            <img src="images/osintchallenge.png" alt="Image of a Sheraton Hotel with a US flag and French flag out the front. There are yellow taxis among the vehicles in the traffic.">
+                        </div>
+                    </div>
+                </section>
+
+                <section id="osint-treasure-hunt" class="content-section">
+                    <h2>OSINT Treasure Hunt</h2>
+                    <div class="challenge-steps">
+                        <h3>Challenge Overview</h3>
+                        <ul>
+                            <li>What can you find out about Jamie from his social profiles?</li>
+                            <li>Review Jamie's social media posts and identify the following:</li>
+                            <ul>
+                                <li>Jamie's full name</li>
+                                <li>Jamie's date of birth</li>
+                                <li>Jamie's school</li>
+                                <li>Jamie's phone number</li>
+                                <li>Possible passwords</li>
+                            </ul>
+                        </ul>
+                    </div>
+                    <div class="social-feed">
+                        <div class="social-post">
+                            <img src="images/socialposts/image1.png" alt="Social media post 1">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image2.png" alt="Social media post 2">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image3.png" alt="Social media post 3">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image4.png" alt="Social media post 4">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image5.png" alt="Social media post 5">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image6.png" alt="Social media post 6">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image7.png" alt="Social media post 7">
+                        </div>
+                        <div class="social-post">
+                            <img src="images/socialposts/image8.png" alt="Social media post 8">
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Australian Women in Security Network (AWSN). All rights reserved.</p>
+    </footer>
+</body>
+</html>

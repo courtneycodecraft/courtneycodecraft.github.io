@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Challenges</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/logo-color.png" alt="AWSN Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="pii.html">PII Investigation</a></li>
+                <li><a href="ctf.html" class="active">CTF Challenges</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="module-content">
+            <h1>CTF Challenges</h1>
+            <p class="module-description">
+                Explore hands-on cybersecurity challenges through our Capture The Flag exercises. Each section provides 
+                practical experience with different aspects of cybersecurity. Download the <a href="assets/Session3_CTF_workbook.docx">CTF workbook</a> and complete the answers as you go.
+            </p>
+
+            <div class="content-sections">
+                <section id="data" class="content-section">
+                    <h2>Data Representation</h2>
+                    <div class="section-content">
+                        <p>
+                            Learn how data is represented in different formats and practice converting between them.
+                            Understanding data representation is crucial for many cybersecurity tasks.
+                        </p>
+                        <div class="challenge-content">
+                            <h3>Challenge Resources</h3>
+                            <ul>
+                                <li><a href="assets/Decimal-Binary-Hex-Conversion.xlsx">Binary and Hexadecimal Conversion</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="files" class="content-section">
+                    <h2>File Types</h2>
+                    <div class="section-content">
+                        <p>
+                            Explore different file types, their structures, and how to analyze them for security purposes.
+                            Learn about file signatures, metadata, and hidden data.
+                        </p>
+                        <div class="challenge-content">
+                            <h3>Challenge Areas</h3>
+                            <ul>
+                                <li><a href="assets/demofile.txt">DemoFile</a></li>
+                                <li><a href="assets/filetypeschallenge.zip">Challenge Files</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="encryption" class="content-section">
+                    <h2>Encryption</h2>
+                    <div class="section-content">
+                        <p>
+                            Practice with various encryption techniques and learn about cryptographic principles.
+                            Understand how encryption protects data and how it can be implemented securely.
+                        </p>
+                    </div>
+                </section>
+
+                <section id="forensics" class="content-section">
+                    <h2>Digital Forensics</h2>
+                    <div class="section-content">
+                        <p>
+                            Learn digital forensics techniques and practice investigating security incidents.
+                            Develop skills in evidence collection and analysis.
+                        </p>
+                        <div class="challenge-content">
+                            <h3>Challenge Resources</h3>
+                            <ul>
+                                <li><a href="assets/digitalforensics/reciperoom_accesslog_20250108.xlsx">Access Log</a></li>
+                                <li><a href="assets/digitalforensics/school_logo_logo.jpg">School Logo</a></li>
+                                <li><a href= "steganography.html">Steganography Tool</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="phishing" class="content-section">
+                    <h2>Phishing</h2>
+                    <div class="section-content">
+                        <p>
+                            Learn to identify and analyze phishing attempts. Practice recognizing common tactics
+                            used in phishing attacks and develop prevention strategies.
+                        </p>
+                        
+                        <h3>Example Phishing Emails</h3>
+                        <p>Analyze these example phishing emails and identify the warning signs:</p>
+                        
+                        <div class="email-container">
+                            <p><strong>From:</strong> <a href="mailto: support@my-govau.com">support@my.gov.au</a></p>
+                            <p><strong>To:</strong> youremail@example.com</p>
+                            <p><strong>Subject:</strong> Urgent: Account Suspended!</p>
+                            <hr>
+                            <div class="img-container"><img src="images/phishing/mygov-logo.svg" alt="My Gov Logo"></div>
+                            <p>Dear Customer,</p>
+                            <p>We detected suspicious activity in your My Gov account. For your security, your account has been temporarily suspended.</p>
+                            <p>Please verify your account to restore access: <a href="http://my-govau.com">Click here to verify your account</a></p>
+                            <p>Failure to act within 24 hours will result in permanent suspension of your account.</p>
+                            <p>Thank you,<br>My Gov Support</p>
+                        </div>
+
+                        <div class="email-container">
+                            <p><strong>From:</strong> <a href="mailto: win@luckydraw-casino8977878.com">win@luckydraw.com</a></p>
+                            <p><strong>To:</strong> youremail@example.com</p>
+                            <p><strong>Subject:</strong> Congratulations! You've Won $10,000!</p>
+                            <hr>
+                            <p>Dear Lucky Winner,</p>
+                            <p>Congratulations! Your email address has been randomly selected as the winner of our $10,000 casino prize draw!</p>
+                            <p>To claim your prize, please click here: <a href="http://luckydraw-casino8977878.com">Claim Your Prize Now</a></p>
+                            <p>This offer expires in 24 hours. Don't miss out on your chance to win big!</p>
+                            <p>Best regards,<br>Lucky Draw Casino Team</p>
+                        </div>
+
+                        <div class="phone">
+                            <div class="screen">
+                                <div class="message-received">
+                                    Your package is waiting for delivery. Confirm your address and pay the outstanding shipping fee: <a href="http://austraylipost.com">Australia Post</a>
+                                </div>
+                                <div class="input-bar">
+                                    Type a message...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Australian Women in Security Network (AWSN). All rights reserved.</p>
+    </footer>
+</body>
+</html>

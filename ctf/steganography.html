@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/logo-color.png" alt="AWSN Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="ctf.html" class="active">CTF Challenges</a></li>
+                <li><a href="assets/cyber_career_toolkit.pdf">Career toolkit</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="module-content">
+            <h1>Steganography Tool</h1>
+            <p class="module-description">
+                There is a hidden message. Can you find it?
+            </p>
+
+            <div class="content-sections">
+
+                <div class="content-sections">
+                    <section id="steganography" class="content-section">
+                        <!-- Options Section -->
+                        <div class="container">
+                            <div class="options">
+                                <div class="channels">
+                                    <h2>Channels</h2>
+                                    <label><input type="radio" name="channel" id="originalImage" checked> Original</label>
+                                    <label><input type="radio" name="channel" id="redChannel"> Red</label>
+                                    <label><input type="radio" name="channel" id="greenChannel"> Green</label>
+                                    <label><input type="radio" name="channel" id="blueChannel"> Blue</label>
+                                </div>
+                                <div class="bits">
+                                    <h2>Bits</h2>
+                                    <label><input type="checkbox" id="bit128" checked> 128</label>
+                                    <label><input type="checkbox" id="bit64" checked> 64</label>
+                                    <label><input type="checkbox" id="bit32" checked> 32</label>
+                                    <label><input type="checkbox" id="bit16" checked> 16</label>
+                                    <label><input type="checkbox" id="bit8" checked> 8</label>
+                                    <label><input type="checkbox" id="bit4" checked> 4</label>
+                                    <label><input type="checkbox" id="bit2" checked> 2</label>
+                                    <label><input type="checkbox" id="bit1" checked> 1</label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                <!-- Image Section -->
+        <div class="image-container">
+            <img src="assets/digitalforensics/island-holiday.png" alt="holiday image">
+            <canvas id="imageCanvas"></canvas>
+        </div>
+    </div>
+ 
+ 
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Australian Women in Security Network (AWSN). All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

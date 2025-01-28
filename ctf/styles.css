@@ -1,0 +1,343 @@
+:root {
+    --primary-color: #6e14ec;
+    --secondary-color: #6c757d;
+    --background-color: #ffffff;
+    --text-color: #333333;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+header {
+    background-color: var(--background-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+}
+
+.nav-links li {
+    margin-left: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: color 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--background-color);
+    background-color: var(--primary-color);
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 1rem 2rem;
+    min-height: calc(100vh - 60px);
+}
+
+.hero {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+.modules {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 2rem 0;
+    margin-bottom: 4rem;
+}
+
+.module-card {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /*cursor: pointer;*/
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.module-card h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.module-card ul {
+    list-style: none;
+    margin-top: 1rem;
+}
+
+.module-card ul li {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.module-card ul li:last-child {
+    border-bottom: none;
+}
+
+.module-card ul li a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+    display: block;
+}
+
+.module-card ul li a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    text-align: center;
+    padding: 1rem;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.module-content {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.content-sections {
+    display: grid;
+    gap: 2rem;
+}
+
+.module-description {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+.content-section {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.content-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.section-content {
+    margin-top: 1rem;
+}
+
+.section-content h3 {
+    color: var(--secondary-color);
+    margin: 1rem 0;
+}
+
+.section-content ul {
+    list-style: disc;
+    margin-left: 2rem;
+}
+
+.section-content ul li {
+    margin: 0.5rem 0;
+}
+
+.challenge-content {
+    background-color: rgba(0,123,255,0.05);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .modules {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Email Styles */
+.email-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.email-container a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.email-container img {
+    max-width: 100%;
+    padding: 10px;
+}
+
+.img-container {
+    width: 100%;
+    background-color: #82D1EB;
+    padding: 10px;
+    text-align: center;
+}
+
+.email-container hr {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid #ddd;
+}
+
+/* Phone Message Styles */
+.phone {
+    width: 300px;
+    margin: 20px auto;
+    background: #f1f1f1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.screen {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.message-received {
+    background: #e8e8e8;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.input-bar {
+    background: #fff;
+    padding: 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+}
+/* Responsive Styling for Options and Image Layout */
+.content-sections {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for small screens */
+    justify-content: space-between;
+    align-items: flex-start; /* Align items at the top */
+    gap: 20px; /* Spacing between sections */
+}
+
+.options {
+    flex: 1; /* Let options take up available space */
+    min-width: 250px; /* Ensure a minimum width */
+}
+
+.image-container {
+    flex: 1; /* Let the image take up available space */
+    max-width: 400px; /* Limit the maximum width */
+}
+
+.image-container img, .image-container canvas {
+    max-width: 100%; /* Ensure image or canvas doesn't overflow */
+    height: auto; /* Maintain aspect ratio */
+}
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    main {
+        padding: 5rem 1rem 2rem;
+    }
+
+    .module-card {
+        padding: 1.5rem;
+    }    
+/* Responsive Stacking for Small Screens */
+    .content-sections {
+        flex-direction: column; /* Stack sections vertically */
+    }
+    
+    .options, .image-container {
+        max-width: 100%; /* Full width for both sections */
+    }
+}
