@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steganography Tool</title>
+    <title>CTF Challenges - AWSN Cyber Experience Workshop</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
         <nav>
             <div class="logo">
                 <a href="index.html">
-                    <img src="assets/logo-color.png" alt="AWSN Logo">
+                    <img src="assets/logo-head.png" alt="AWSN Logo">
                 </a>
             </div>
             <ul class="nav-links">
@@ -30,9 +30,7 @@
             </p>
 
             <div class="content-sections">
-
-                <div class="content-sections">
-                    <section id="steganography" class="content-section">
+                <section id="steganography" class="content-section">
                         <!-- Options Section -->
                         <div class="container">
                             <div class="options">
@@ -59,13 +57,12 @@
                     </section>
 
                 <!-- Image Section -->
-        <div class="image-container">
-            <img src="assets/digitalforensics/island-holiday.png" alt="holiday image">
-            <canvas id="imageCanvas"></canvas>
-        </div>
-    </div>
- 
- 
+                    <!-- Image Section -->
+                    <div class="image-container">
+                        <img src="assets/digitalforensics/island-holiday.png" alt="holiday image" id="sourceImage" crossorigin="anonymous">
+                        <canvas id="imageCanvas"></canvas>
+                    </div>
+                </section>
             </div>
         </section>
     </main>
