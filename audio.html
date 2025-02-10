@@ -57,7 +57,18 @@
                 drawWaveform(audioBuffer, ctx);
                 updateFileSize(audioBuffer);
             };
+        }).catch(error => {
+            console.error("Error accessing microphone:", error);
+            alert("Microphone access is required for recording.");
         });
+
+        recordButton.onclick = () => {
+            if (recorder && recorder.state === "inactive") {
+                audioChunks = [];
+                recorder.start();
+                setTimeout(() => recorder.stop(), 3000); // Record for 3 seconds
+            }
+        };
 
         playButton.onclick = () => {
             if (!audioBuffer) return;
