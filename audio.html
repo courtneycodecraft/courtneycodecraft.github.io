@@ -21,6 +21,8 @@
     <p id="fileSize">File Size: 0 KB</p>
     <button id="record">Record</button>
     <button id="play">Play</button>
+    <p>Binary Representation of Samples:</p>
+    <pre id="binaryOutput"></pre>
     <script>
         const canvas = document.getElementById("waveform");
         const digitalCanvas = document.getElementById("digitalWaveform");
@@ -32,6 +34,7 @@
         const recordButton = document.getElementById("record");
         const playButton = document.getElementById("play");
         const fileSizeDisplay = document.getElementById("fileSize");
+        const binaryOutput = document.getElementById("binaryOutput");
         let audioBuffer;
         let recorder;
         let audioChunks = [];
@@ -56,12 +59,6 @@
             };
         });
 
-        recordButton.onclick = () => {
-            audioChunks = [];
-            recorder.start();
-            setTimeout(() => recorder.stop(), 3000); // Record for 3 seconds
-        };
-
         playButton.onclick = () => {
             if (!audioBuffer) return;
             const source = audioContext.createBufferSource();
@@ -70,49 +67,22 @@
             source.connect(audioContext.destination);
             source.start();
             drawWaveform(encodedBuffer, digitalCtx);
+            displayBinarySamples(encodedBuffer);
         };
 
-        function encodeAudio(buffer, sampleRate, bitDepth) {
-            const numChannels = buffer.numberOfChannels;
-            const length = Math.floor(buffer.length * (sampleRate / buffer.sampleRate));
-            const newBuffer = audioContext.createBuffer(numChannels, length, sampleRate);
-            for (let channel = 0; channel < numChannels; channel++) {
-                const oldData = buffer.getChannelData(channel);
-                const newData = newBuffer.getChannelData(channel);
-                for (let i = 0; i < length; i++) {
-                    let sample = oldData[Math.floor(i * (buffer.sampleRate / sampleRate))] || 0;
-                    newData[i] = quantizeSample(sample, bitDepth);
-                }
-            }
-            updateFileSize(newBuffer);
-            return newBuffer;
+        function displayBinarySamples(buffer) {
+            const data = buffer.getChannelData(0);
+            const bitDepth = bitDepthSlider.value;
+            let binaryData = data.slice(0, 10).map(sample => {
+                let quantized = quantizeSample(sample, bitDepth);
+                return quantized.toFixed(3) + " -> " + (Math.round(quantized * ((1 << bitDepth) - 1))).toString(2).padStart(bitDepth, '0');
+            }).join('\n');
+            binaryOutput.textContent = binaryData;
         }
 
         function quantizeSample(sample, bitDepth) {
             const levels = Math.pow(2, bitDepth) - 1;
             return Math.round(sample * levels) / levels;
-        }
-
-        function drawWaveform(buffer, context) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            const data = buffer.getChannelData(0);
-            context.beginPath();
-            for (let i = 0; i < data.length; i += 100) {
-                const x = (i / data.length) * canvas.width;
-                const y = (1 - (data[i] + 1) / 2) * canvas.height;
-                if (i === 0) context.moveTo(x, y);
-                else context.lineTo(x, y);
-            }
-            context.stroke();
-        }
-
-        function updateFileSize(buffer) {
-            const sampleRate = sampleRateSlider.value;
-            const bitDepth = bitDepthSlider.value;
-            const sizeInBits = buffer.length * buffer.numberOfChannels * bitDepth;
-            const sizeInBytes = sizeInBits / 8;
-            const sizeInKB = (sizeInBytes / 1024).toFixed(2);
-            fileSizeDisplay.textContent = `File Size: ${sizeInKB} KB`;
         }
     </script>
 </body>
