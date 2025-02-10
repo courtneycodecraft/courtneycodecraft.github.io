@@ -6,26 +6,32 @@
     <title>Digital Audio Encoding Demo</title>
     <style>
         canvas { border: 1px solid black; width: 100%; height: 200px; }
+        #record { background-color: red; color: white; }
     </style>
 </head>
 <body>
     <h1>Digital Audio Encoding Demo</h1>
     <canvas id="waveform"></canvas>
+    <canvas id="digitalWaveform"></canvas>
     <br>
     <label>Sampling Rate: <input type="range" id="sampleRate" min="8000" max="44100" step="1000" value="44100"></label>
     <br>
     <label>Bit Depth: <input type="range" id="bitDepth" min="2" max="16" step="1" value="16"></label>
     <br>
+    <p id="fileSize">File Size: 0 KB</p>
     <button id="record">Record</button>
     <button id="play">Play</button>
     <script>
         const canvas = document.getElementById("waveform");
+        const digitalCanvas = document.getElementById("digitalWaveform");
         const ctx = canvas.getContext("2d");
+        const digitalCtx = digitalCanvas.getContext("2d");
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const sampleRateSlider = document.getElementById("sampleRate");
         const bitDepthSlider = document.getElementById("bitDepth");
         const recordButton = document.getElementById("record");
         const playButton = document.getElementById("play");
+        const fileSizeDisplay = document.getElementById("fileSize");
         let audioBuffer;
         let recorder;
         let audioChunks = [];
@@ -35,11 +41,18 @@
             recorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
+            recorder.onstart = () => {
+                recordButton.style.backgroundColor = "green";
+                recordButton.textContent = "Recording...";
+            };
             recorder.onstop = async () => {
+                recordButton.style.backgroundColor = "red";
+                recordButton.textContent = "Record";
                 const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                 const arrayBuffer = await audioBlob.arrayBuffer();
                 audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                drawWaveform(audioBuffer);
+                drawWaveform(audioBuffer, ctx);
+                updateFileSize(audioBuffer);
             };
         });
 
@@ -52,9 +65,11 @@
         playButton.onclick = () => {
             if (!audioBuffer) return;
             const source = audioContext.createBufferSource();
-            source.buffer = encodeAudio(audioBuffer, sampleRateSlider.value, bitDepthSlider.value);
+            const encodedBuffer = encodeAudio(audioBuffer, sampleRateSlider.value, bitDepthSlider.value);
+            source.buffer = encodedBuffer;
             source.connect(audioContext.destination);
             source.start();
+            drawWaveform(encodedBuffer, digitalCtx);
         };
 
         function encodeAudio(buffer, sampleRate, bitDepth) {
@@ -69,6 +84,7 @@
                     newData[i] = quantizeSample(sample, bitDepth);
                 }
             }
+            updateFileSize(newBuffer);
             return newBuffer;
         }
 
@@ -77,17 +93,26 @@
             return Math.round(sample * levels) / levels;
         }
 
-        function drawWaveform(buffer) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function drawWaveform(buffer, context) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
             const data = buffer.getChannelData(0);
-            ctx.beginPath();
+            context.beginPath();
             for (let i = 0; i < data.length; i += 100) {
                 const x = (i / data.length) * canvas.width;
                 const y = (1 - (data[i] + 1) / 2) * canvas.height;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
+                if (i === 0) context.moveTo(x, y);
+                else context.lineTo(x, y);
             }
-            ctx.stroke();
+            context.stroke();
+        }
+
+        function updateFileSize(buffer) {
+            const sampleRate = sampleRateSlider.value;
+            const bitDepth = bitDepthSlider.value;
+            const sizeInBits = buffer.length * buffer.numberOfChannels * bitDepth;
+            const sizeInBytes = sizeInBits / 8;
+            const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+            fileSizeDisplay.textContent = `File Size: ${sizeInKB} KB`;
         }
     </script>
 </body>
