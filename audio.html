@@ -38,9 +38,17 @@
         let audioBuffer;
         let recorder;
         let audioChunks = [];
-
+        let audioStream;
+        let analyser;
+        let sourceNode;
+        
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+            audioStream = stream;
             recorder = new MediaRecorder(stream);
+            const input = audioContext.createMediaStreamSource(stream);
+            analyser = audioContext.createAnalyser();
+            input.connect(analyser);
+            
             recorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
@@ -66,6 +74,7 @@
             if (recorder && recorder.state === "inactive") {
                 audioChunks = [];
                 recorder.start();
+                visualizeAudio();
                 setTimeout(() => recorder.stop(), 3000); // Record for 3 seconds
             }
         };
@@ -80,6 +89,24 @@
             drawWaveform(encodedBuffer, digitalCtx);
             displayBinarySamples(encodedBuffer);
         };
+
+        function visualizeAudio() {
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteTimeDomainData(dataArray);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                for (let i = 0; i < dataArray.length; i++) {
+                    const x = (i / dataArray.length) * canvas.width;
+                    const y = (1 - (dataArray[i] / 255)) * canvas.height;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            draw();
+        }
 
         function displayBinarySamples(buffer) {
             const data = buffer.getChannelData(0);
