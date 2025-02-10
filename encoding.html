@@ -7,7 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-        select, button { padding: 10px; margin-right: 10px; }
+        select { padding: 10px; margin-right: 10px; }
         #output { margin-top: 10px; font-weight: bold; }
     </style>
 </head>
@@ -22,7 +22,6 @@
         <option value="utf-16">UTF-16</option>
         <option value="utf-32">UTF-32</option>
     </select>
-    <button onclick="calculateSize()">Check Size</button>
     <p id="output"></p>
 
     <script>
@@ -46,6 +45,9 @@
             
             document.getElementById("output").innerText = `Encoded Size: ${encodedData.length} bytes`;
         }
+
+        document.getElementById("textInput").addEventListener("input", calculateSize);
+        document.getElementById("encoding").addEventListener("change", calculateSize);
     </script>
 </body>
 </html>
