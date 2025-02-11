@@ -38,30 +38,27 @@
         let audioBuffer;
         let recorder;
         let audioChunks = [];
-        let audioStream;
-        let analyser;
+        let mediaStream;
         let animationFrameId;
+        const MAX_RECORD_TIME = 5000; // 5 seconds
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-            audioStream = stream;
+            mediaStream = stream;
             recorder = new MediaRecorder(stream);
-            const input = audioContext.createMediaStreamSource(stream);
-            analyser = audioContext.createAnalyser();
-            input.connect(analyser);
-            
             recorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
             recorder.onstart = () => {
                 recordButton.style.backgroundColor = "green";
                 recordButton.textContent = "Recording...";
-                visualizeAudio();
+                audioChunks = [];
             };
             recorder.onstop = async () => {
                 recordButton.style.backgroundColor = "red";
                 recordButton.textContent = "Record";
                 cancelAnimationFrame(animationFrameId);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
                 const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                 const arrayBuffer = await audioBlob.arrayBuffer();
                 audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -75,9 +72,12 @@
 
         recordButton.onclick = () => {
             if (recorder && recorder.state === "inactive") {
-                audioChunks = [];
                 recorder.start();
-                setTimeout(() => recorder.stop(), 3000); // Record for 3 seconds
+                setTimeout(() => {
+                    if (recorder.state === "recording") {
+                        recorder.stop();
+                    }
+                }, MAX_RECORD_TIME);
             }
         };
 
@@ -91,22 +91,17 @@
             displayBinarySamples(audioBuffer);
         };
 
-        function visualizeAudio() {
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            function draw() {
-                animationFrameId = requestAnimationFrame(draw);
-                analyser.getByteTimeDomainData(dataArray);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.beginPath();
-                for (let i = 0; i < dataArray.length; i++) {
-                    const x = (i / dataArray.length) * canvas.width;
-                    const y = (1 - (dataArray[i] / 255)) * canvas.height;
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
+        function drawWaveform(buffer, context) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            const data = buffer.getChannelData(0);
+            context.beginPath();
+            for (let i = 0; i < data.length; i += Math.floor(data.length / canvas.width)) {
+                const x = (i / data.length) * canvas.width;
+                const y = (1 - (data[i] + 1) / 2) * canvas.height;
+                if (i === 0) context.moveTo(x, y);
+                else context.lineTo(x, y);
             }
-            draw();
+            context.stroke();
         }
 
         function displayBinarySamples(buffer) {
