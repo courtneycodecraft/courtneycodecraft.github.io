@@ -40,8 +40,8 @@
         let audioChunks = [];
         let audioStream;
         let analyser;
-        let sourceNode;
-        
+        let animationFrameId;
+
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
             audioStream = stream;
             recorder = new MediaRecorder(stream);
@@ -55,10 +55,13 @@
             recorder.onstart = () => {
                 recordButton.style.backgroundColor = "green";
                 recordButton.textContent = "Recording...";
+                visualizeAudio();
             };
             recorder.onstop = async () => {
                 recordButton.style.backgroundColor = "red";
                 recordButton.textContent = "Record";
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                 const arrayBuffer = await audioBlob.arrayBuffer();
                 audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -74,7 +77,6 @@
             if (recorder && recorder.state === "inactive") {
                 audioChunks = [];
                 recorder.start();
-                visualizeAudio();
                 setTimeout(() => recorder.stop(), 3000); // Record for 3 seconds
             }
         };
@@ -82,18 +84,17 @@
         playButton.onclick = () => {
             if (!audioBuffer) return;
             const source = audioContext.createBufferSource();
-            const encodedBuffer = encodeAudio(audioBuffer, sampleRateSlider.value, bitDepthSlider.value);
-            source.buffer = encodedBuffer;
+            source.buffer = audioBuffer;
             source.connect(audioContext.destination);
             source.start();
-            drawWaveform(encodedBuffer, digitalCtx);
-            displayBinarySamples(encodedBuffer);
+            drawWaveform(audioBuffer, digitalCtx);
+            displayBinarySamples(audioBuffer);
         };
 
         function visualizeAudio() {
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
             function draw() {
-                requestAnimationFrame(draw);
+                animationFrameId = requestAnimationFrame(draw);
                 analyser.getByteTimeDomainData(dataArray);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.beginPath();
