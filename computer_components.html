@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside Your Computer — Year 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --cpu: #534AB7; --cpu-l: #EEEDFE; --cpu-d: #26215C;
+  --ram: #0F6E56; --ram-l: #E1F5EE; --ram-d: #04342C;
+  --ssd: #993C1D; --ssd-l: #FAECE7; --ssd-d: #4A1B0C;
+  --mb:  #854F0B; --mb-l:  #FAEEDA; --mb-d:  #412402;
+  --tog: #185FA5; --tog-l: #E6F1FB; --tog-d: #042C53;
+  --build-g: #2d6a2d; --build-l: #e8f5e2; --build-d: #1a3d1a;
+  --quiz-d: #26215C;
+  --board-bg: #2d5a1b; --board-dark: #1a3a0e;
+  --bg: #f0efe8;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-2: #555;
+  --border: rgba(0,0,0,.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  background: #1a1630;
+  padding: 2.2rem 1.5rem 1.8rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+.hero-glow {
+  position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+  width: 340px; height: 200px;
+  background: radial-gradient(ellipse, rgba(83,74,183,.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-chip { font-size: 2.4rem; display: block; margin-bottom: .5rem; position: relative; animation: chipFloat 3s ease-in-out infinite; }
+@keyframes chipFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.hero h1 { font-size: 2rem; font-weight: 900; color: #fff; position: relative; letter-spacing: -.5px; line-height: 1.1; }
+.hero h1 span { color: #AFA9EC; }
+.hero-sub { color: rgba(255,255,255,.55); font-size: .92rem; font-weight: 700; margin-top: .4rem; position: relative; }
+.hero-badges {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-top: 1rem; position: relative;
+}
+.hero-badge {
+  padding: .3rem .85rem; border-radius: 50px;
+  font-size: .75rem; font-weight: 800;
+  border: 1.5px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.7);
+  background: rgba(255,255,255,.07);
+}
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+.nav-wrap {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav {
+  display: flex; gap: 4px;
+  padding: .7rem .9rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 860px; margin: 0 auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.nav::-webkit-scrollbar { display: none; }
+.tab {
+  border: none; padding: .45rem .9rem; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-size: .78rem; font-weight: 800;
+  cursor: pointer; transition: all .18s; white-space: nowrap;
+  background: var(--bg); color: var(--text-2);
+  border: 2px solid transparent; flex-shrink: 0;
+}
+.tab:hover { transform: translateY(-1px); }
+.tab.on { color: #fff; transform: translateY(-2px); }
+.tab[data-t=cpu].on  { background: var(--cpu); }
+.tab[data-t=ram].on  { background: var(--ram); }
+.tab[data-t=ssd].on  { background: var(--ssd); }
+.tab[data-t=mb].on   { background: var(--mb); }
+.tab[data-t=tog].on  { background: var(--tog); }
+.tab[data-t=build].on{ background: var(--build-g); }
+.tab[data-t=quiz].on { background: var(--quiz-d); }
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+.progress-bar-wrap {
+  background: var(--card);
+  padding: .5rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.progress-bar-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+.progress-label { font-size: .72rem; font-weight: 800; color: var(--text-2); white-space: nowrap; }
+.progress-dots { display: flex; gap: 5px; }
+.pdot {
+  width: 28px; height: 6px; border-radius: 3px;
+  background: var(--bg); border: 1.5px solid rgba(0,0,0,.1);
+  transition: all .3s; cursor: pointer;
+}
+.pdot.visited { opacity: .6; }
+.pdot[data-s=cpu].visited,  .pdot[data-s=cpu].current  { background: var(--cpu); border-color: var(--cpu); }
+.pdot[data-s=ram].visited,  .pdot[data-s=ram].current  { background: var(--ram); border-color: var(--ram); }
+.pdot[data-s=ssd].visited,  .pdot[data-s=ssd].current  { background: var(--ssd); border-color: var(--ssd); }
+.pdot[data-s=mb].visited,   .pdot[data-s=mb].current   { background: var(--mb);  border-color: var(--mb); }
+.pdot[data-s=tog].visited,  .pdot[data-s=tog].current  { background: var(--tog); border-color: var(--tog); }
+.pdot[data-s=build].visited,.pdot[data-s=build].current{ background: var(--build-g); border-color: var(--build-g); }
+.pdot[data-s=quiz].visited, .pdot[data-s=quiz].current { background: var(--quiz-d); border-color: var(--quiz-d); }
+.pdot.current { opacity: 1 !important; transform: scaleY(1.4); }
+.progress-pct { font-family: 'Space Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--text-2); margin-left: auto; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.wrap { max-width: 720px; margin: 0 auto; padding: 1rem .9rem 2rem; }
+.panel { display: none; animation: fadeUp .25s ease; }
+.panel.on { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══════════════════════════════════════════
+   CARD SYSTEM
+═══════════════════════════════════════════ */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px;
+}
+.card-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1.2rem 1.3rem 1rem;
+}
+.card-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.7rem; flex-shrink: 0;
+}
+.card-tag { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; opacity: .6; }
+.card-title { font-size: 1.15rem; font-weight: 900; line-height: 1.2; margin-top: 1px; }
+.card-body { padding: .1rem 1.3rem 1.1rem; }
+.desc { font-size: .93rem; color: var(--text-2); line-height: 1.65; font-weight: 700; }
+.analogy {
+  margin: .85rem 0; padding: .9rem 1rem; border-radius: 11px;
+  display: flex; gap: 9px; font-size: .9rem; font-weight: 700; line-height: 1.6;
+}
+.analogy-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: -1px; }
+.wow {
+  margin: .75rem 0 0; padding: .75rem .95rem;
+  border-radius: 9px; border-left: 3px solid;
+  font-size: .84rem; font-weight: 700; line-height: 1.55;
+}
+.facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: .85rem 0 0; }
+.fact { padding: .75rem .85rem; border-radius: 10px; text-align: center; }
+.fact-label { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
+.fact-val { font-size: 1.05rem; font-weight: 900; margin-top: 2px; line-height: 1.2; }
+.iarea { padding: .8rem 1.3rem 1.3rem; border-top: 1px solid var(--border); }
+.ilabel { font-size: .69rem; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--text-2); margin-bottom: .65rem; }
+
+/* ═══════════════════════════════════════════
+   SECTION NAVIGATION (bottom of each panel)
+═══════════════════════════════════════════ */
+.section-nav { display: flex; gap: 8px; margin-top: 14px; }
+.snav-btn {
+  flex: 1; padding: .6rem; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .82rem;
+  cursor: pointer; border: 2px solid var(--border);
+  background: var(--card); color: var(--text-2);
+  transition: all .18s; text-align: center;
+}
+.snav-btn:hover { background: var(--bg); }
+.snav-btn.next {
+  background: var(--quiz-d); color: #fff; border-color: transparent;
+}
+.snav-btn.next:hover { opacity: .9; }
+
+/* ═══════════════════════════════════════════
+   CPU — PIPELINE DEMO
+═══════════════════════════════════════════ */
+.pipeline {
+  background: #F7F6FE; border-radius: 12px;
+  padding: 12px; border: 1.5px solid rgba(83,74,183,.1);
+  position: relative;
+}
+.pipe-cols { display: grid; grid-template-columns: 1fr 68px 1fr; gap: 8px; align-items: start; margin-bottom: 10px; }
+.pipe-col-label { font-size: .63rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; text-align: center; margin-bottom: 5px; opacity: .45; }
+.pipe-queue, .pipe-done { display: flex; flex-direction: column; gap: 5px; min-height: 155px; }
+.pipe-task {
+  padding: 5px 8px; border-radius: 7px; font-size: .73rem; font-weight: 800;
+  display: flex; align-items: center; gap: 5px; transition: all .25s;
+  border: 1.5px solid transparent;
+}
+.pipe-task.waiting { background: var(--cpu-l); color: var(--cpu-d); border-color: rgba(83,74,183,.15); }
+.pipe-task.done-item { background: #E1F5EE; color: #04342C; border-color: rgba(15,110,86,.2); animation: slideIn .25s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+.task-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pipe-cpu-col { display: flex; flex-direction: column; align-items: center; gap: 5px; padding-top: 16px; }
+.pipe-chip {
+  width: 62px; height: 62px; background: var(--cpu); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  transition: transform .15s; flex-shrink: 0;
+}
+.pipe-chip.crunch { animation: crunch .25s ease; }
+@keyframes crunch { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.pipe-arrow { font-size: .9rem; color: rgba(83,74,183,.35); text-align: center; }
+.pipe-active {
+  background: var(--cpu); color: #fff; border-radius: 7px;
+  padding: 4px 6px; font-size: .68rem; font-weight: 800; text-align: center;
+  min-height: 26px; display: flex; align-items: center; justify-content: center;
+  margin-top: 3px; width: 100%;
+}
+.pipe-active.processing { animation: processPulse .4s ease infinite alternate; }
+@keyframes processPulse { from{background:var(--cpu)} to{background:#7F77DD} }
+.pipe-stats { display: flex; align-items: center; gap: 10px; margin-top: 9px; padding: 7px 10px; background: rgba(83,74,183,.06); border-radius: 8px; }
+.pipe-stat { text-align: center; flex: 1; }
+.pipe-stat-val { font-family: 'Space Mono', monospace; font-size: .95rem; font-weight: 700; color: var(--cpu-d); }
+.pipe-stat-lbl { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; opacity: .5; margin-top: 1px; }
+.speed-row { display: flex; align-items: center; gap: 6px; margin-top: 9px; }
+.spbtn { padding: .3rem .7rem; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .75rem; border: 2px solid rgba(83,74,183,.2); background: var(--cpu-l); color: var(--cpu-d); cursor: pointer; transition: all .15s; }
+.spbtn:hover, .spbtn.on { background: var(--cpu); color: #fff; border-color: var(--cpu); }
+.lag-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,.82); border-radius: 11px; align-items: center; justify-content: center; flex-direction: column; gap: 5px; z-index: 5; }
+.lag-overlay.show { display: flex; }
+.lag-spin { width: 26px; height: 26px; border: 3px solid rgba(83,74,183,.15); border-top-color: var(--cpu); border-radius: 50%; animation: spin 1.2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════
+   RAM DEMO
+═══════════════════════════════════════════ */
+.ram-scene { border-radius: 12px; overflow: hidden; border: 1.5px solid rgba(15,110,86,.12); }
+.ram-desk { background: #F0FAF5; padding: 11px 11px 6px; }
+.ram-desk-lbl { font-size: .67rem; font-weight: 800; color: var(--ram-d); opacity: .5; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
+.ram-slots-row { display: flex; gap: 6px; flex-wrap: wrap; min-height: 52px; align-items: flex-end; }
+.ram-book { padding: 7px 9px; border-radius: 9px; font-size: .78rem; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+.ram-bag { background: rgba(15,110,86,.07); padding: 9px 11px; border-top: 2px dashed rgba(15,110,86,.15); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ram-bag-lbl { font-size: .67rem; font-weight: 800; color: var(--ram-d); opacity: .5; text-transform: uppercase; letter-spacing: .5px; margin-right: 3px; }
+.ram-meter-track { height: 22px; background: rgba(15,110,86,.1); border-radius: 7px; overflow: hidden; border: 1.5px solid rgba(15,110,86,.15); margin-top: 8px; }
+.ram-meter-fill { height: 100%; border-radius: 6px; transition: width .4s cubic-bezier(.34,1.56,.64,1), background .3s; display: flex; align-items: center; justify-content: center; }
+.ram-fill-txt { font-size: .7rem; font-weight: 800; color: #fff; }
+.ram-msg { font-size: .8rem; font-weight: 700; margin-top: 5px; min-height: 20px; }
+
+/* ═══════════════════════════════════════════
+   SSD RACE
+═══════════════════════════════════════════ */
+.race-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.race-label { font-size: .76rem; font-weight: 800; min-width: 34px; }
+.race-track { flex: 1; height: 28px; background: rgba(0,0,0,.05); border-radius: 7px; overflow: hidden; position: relative; border: 1.5px solid rgba(0,0,0,.07); }
+.race-fill { position: absolute; inset: 0; border-radius: 6px; transition: width .05s linear; display: flex; align-items: center; justify-content: flex-end; padding-right: 7px; }
+.race-fill-txt { font-size: .7rem; font-weight: 800; color: #fff; white-space: nowrap; }
+.race-time { font-size: .73rem; font-weight: 800; min-width: 42px; text-align: right; font-family: 'Space Mono', monospace; }
+.run-btn { width: 100%; padding: .48rem; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .84rem; cursor: pointer; border: 2px solid; transition: all .15s; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════
+   MAINBOARD TRACE DEMO
+═══════════════════════════════════════════ */
+.mb-board-svg { width: 100%; border-radius: 13px; overflow: hidden; display: block; }
+.mb-parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.mb-part-btn {
+  padding: .6rem .9rem; border-radius: 10px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .82rem;
+  cursor: pointer; border: 2px solid transparent;
+  display: flex; align-items: center; gap: 7px; transition: all .18s;
+}
+.mb-part-btn:hover { transform: translateY(-1px); }
+.mb-info-panel {
+  margin-top: 10px; padding: .85rem 1rem; border-radius: 10px;
+  font-size: .87rem; font-weight: 700; border: 1.5px solid rgba(133,79,11,.15);
+  background: var(--mb-l); color: var(--mb-d); line-height: 1.6; min-height: 52px; transition: all .25s;
+}
+
+/* ═══════════════════════════════════════════
+   TOGETHER
+═══════════════════════════════════════════ */
+.tog-scene { padding: 10px; background: rgba(24,95,165,.04); border-radius: 14px; border: 2px dashed rgba(24,95,165,.15); }
+.parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 10px; }
+.tpart { border-radius: 13px; padding: 11px 9px; text-align: center; border: 2px solid transparent; transition: all .25s; position: relative; overflow: hidden; }
+.tpart-icon { font-size: 1.7rem; display: block; margin-bottom: 3px; transition: transform .2s; }
+.tpart-name { font-size: .83rem; font-weight: 900; line-height: 1.2; }
+.tpart-status { font-size: .7rem; font-weight: 700; opacity: .55; margin-top: 2px; min-height: 15px; transition: all .2s; }
+.tpart.active { transform: scale(1.05); border-width: 2px; }
+.tpart.active .tpart-icon { transform: scale(1.12); }
+.tpart.active .tpart-status { opacity: 1; font-weight: 800; }
+.tpart-pulse { position: absolute; inset: 0; border-radius: 11px; opacity: 0; pointer-events: none; }
+.tpart.active .tpart-pulse { animation: partPulse .6s ease forwards; }
+@keyframes partPulse { 0%{opacity:.3} 100%{opacity:0} }
+.event-display { background: var(--bg); border-radius: 10px; padding: 10px 12px; min-height: 64px; font-size: .87rem; font-weight: 700; line-height: 1.6; }
+.event-step { animation: stepIn .3s ease forwards; }
+@keyframes stepIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.progress-strip { height: 4px; background: rgba(24,95,165,.1); border-radius: 2px; margin-top: 7px; overflow: hidden; }
+.progress-fill-tog { height: 100%; background: var(--tog); border-radius: 2px; transition: width .6s ease; }
+.tog-log { margin-top: 10px; background: var(--bg); border-radius: 10px; overflow: hidden; display: none; }
+.tog-log.show { display: block; animation: fadeUp .3s ease; }
+.tog-log-header { padding: 7px 12px; font-size: .69rem; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--tog-d); background: rgba(24,95,165,.07); border-bottom: 1px solid rgba(24,95,165,.1); }
+.tog-log-body { padding: 8px 12px; font-size: .81rem; font-weight: 700; line-height: 2; }
+.log-entry { display: flex; align-items: baseline; gap: 7px; border-bottom: .5px solid var(--border); padding: 2px 0; }
+.log-entry:last-child { border-bottom: none; }
+.log-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.log-discuss-btn { display: block; width: 100%; margin-top: 8px; padding: .45rem; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .8rem; cursor: pointer; background: var(--tog-l); color: var(--tog-d); border: 2px solid rgba(24,95,165,.2); transition: all .15s; }
+.log-discuss-btn:hover { background: var(--tog); color: #fff; }
+.sc-btns { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+.sc-btn { padding: .38rem .8rem; border-radius: 50px; font-size: .78rem; font-weight: 800; cursor: pointer; border: 2px solid rgba(24,95,165,.2); background: var(--tog-l); color: var(--tog-d); transition: all .15s; font-family: 'Nunito', sans-serif; }
+.sc-btn:hover { background: var(--tog); color: #fff; border-color: var(--tog); }
+.sc-btn.on { background: var(--tog); color: #fff; border-color: var(--tog); }
+
+/* ═══════════════════════════════════════════
+   BUILD A PC — MOTHERBOARD
+═══════════════════════════════════════════ */
+.parts-shelf { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-start; justify-content: center; }
+.part-chip {
+  cursor: grab; transition: all .2s; user-select: none; touch-action: none;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 8px; border-radius: 10px; border: 2px solid transparent;
+  font-size: .72rem; font-weight: 800; text-align: center;
+}
+.part-chip:hover { transform: translateY(-3px); }
+.part-chip.dragging { opacity: .45; cursor: grabbing; transform: scale(.95); }
+.part-chip.placed { opacity: .28; pointer-events: none; }
+.part-chip svg { display: block; }
+.mobo-canvas {
+  position: relative; background: #2d5a1b; border-radius: 10px;
+  border: 3px solid #1a3a0e; padding: 0; overflow: hidden;
+  aspect-ratio: 1/1.1; max-width: 340px; margin: 0 auto;
+}
+.mobo-inner { position: absolute; inset: 8px; background: #346b20; border-radius: 6px; border: 1px solid #1a3a0e; }
+.mobo-traces { position: absolute; inset: 0; pointer-events: none; }
+.trace { position: absolute; background: #b8860b; opacity: .35; border-radius: 1px; }
+.trace.h { height: 2px; } .trace.v { width: 2px; }
+.trace.lit { background: #f0c030; opacity: .9; transition: none; animation: traceLit .4s ease; }
+@keyframes traceLit { 0%,100%{opacity:.9} 50%{opacity:1} }
+.mobo-slot {
+  position: absolute; border-radius: 6px;
+  border: 2.5px dashed rgba(255,255,255,.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; transition: all .2s; background: rgba(0,0,0,.2);
+}
+.mobo-slot.over { border-color: rgba(255,255,0,.7); background: rgba(255,255,0,.1); transform: scale(1.03); }
+.mobo-slot.filled { border-style: solid; border-color: rgba(255,255,255,.15); }
+.mobo-slot.wrong-drop { animation: wrongShake .35s ease; }
+@keyframes wrongShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+.slot-hint { font-size: .62rem; font-weight: 800; color: rgba(255,255,255,.5); text-align: center; text-transform: uppercase; letter-spacing: .4px; line-height: 1.2; }
+.mounted-part { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; }
+.mounted-check { position: absolute; top: 3px; right: 5px; font-size: .8rem; }
+.mobo-cap { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: rgba(180,160,60,.6); border: 1.5px solid rgba(255,255,255,.3); }
+.mobo-heatsink { position: absolute; background: rgba(120,120,120,.5); border-radius: 3px; border: 1px solid rgba(255,255,255,.1); }
+.mobo-port { width: 10px; height: 7px; background: rgba(60,120,200,.5); border-radius: 1px; border: 1px solid rgba(100,160,255,.3); }
+.chip-label { font-size: .58rem; font-weight: 800; color: rgba(255,255,255,.4); text-align: center; position: absolute; pointer-events: none; text-transform: uppercase; letter-spacing: .3px; }
+.build-status-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.build-badge { padding: .3rem .8rem; border-radius: 50px; font-size: .76rem; font-weight: 800; border: 1.5px solid transparent; transition: all .25s; }
+.build-badge.empty { background: var(--bg); color: var(--text-2); border-color: var(--border); }
+.build-badge.done { color: #fff; }
+.power-btn { flex: 1; min-width: 120px; padding: .55rem .9rem; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .88rem; cursor: pointer; border: none; background: #888; color: #fff; transition: all .3s; pointer-events: none; text-align: center; }
+.power-btn.ready { background: var(--cpu-d); pointer-events: all; animation: readyPulse 1.4s ease-in-out infinite alternate; }
+@keyframes readyPulse { from{background:#26215C} to{background:#534AB7} }
+.boot-screen { display: none; margin-top: 10px; background: #0a0a1a; border-radius: 10px; padding: 12px 14px; color: #00e676; font-family: 'Space Mono', monospace; font-size: .72rem; min-height: 110px; line-height: 1.9; }
+.boot-screen.show { display: block; animation: fadeUp .3s ease; }
+.boot-line { opacity: 0; animation: bootLine .15s ease forwards; }
+@keyframes bootLine { to { opacity: 1; } }
+.reset-btn { width: 100%; margin-top: 7px; padding: .45rem; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .8rem; cursor: pointer; border: 2px solid var(--border); background: transparent; color: var(--text-2); transition: all .15s; }
+.reset-btn:hover { background: var(--bg); }
+
+/* ═══════════════════════════════════════════
+   QUIZ
+═══════════════════════════════════════════ */
+.quiz-intro { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.3rem; margin-bottom: 12px; text-align: center; }
+.quiz-intro-icon { font-size: 2.5rem; display: block; margin-bottom: .5rem; }
+.quiz-intro-title { font-size: 1.2rem; font-weight: 900; color: var(--quiz-d); margin-bottom: .4rem; }
+.quiz-intro-sub { font-size: .9rem; font-weight: 700; color: var(--text-2); line-height: 1.6; }
+.q-number-wrap { display: flex; gap: 4px; justify-content: center; margin-bottom: 1rem; }
+.q-pip { width: 8px; height: 8px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border); transition: background .2s; }
+.q-pip.ans { background: var(--cpu); border-color: var(--cpu); }
+.q-pip.right { background: var(--ram); border-color: var(--ram); }
+.q-pip.wrong { background: var(--ssd); border-color: var(--ssd); }
+.qcard { background: var(--card); border-radius: 13px; border: 1px solid var(--border); padding: 1.2rem; margin-bottom: 9px; }
+.qnum { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--text-2); margin-bottom: .4rem; }
+.qtxt { font-size: .97rem; font-weight: 800; color: var(--text); margin-bottom: .8rem; line-height: 1.45; }
+.qopts { display: flex; flex-direction: column; gap: 6px; }
+.qopt { padding: .65rem .9rem; border-radius: 9px; background: var(--bg); border: 2px solid transparent; font-family: 'Nunito', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; text-align: left; transition: all .15s; color: var(--text); }
+.qopt:hover:not(:disabled) { border-color: var(--cpu); background: var(--cpu-l); color: var(--cpu-d); }
+.qopt.right { background: var(--ram-l); border-color: var(--ram); color: var(--ram-d); }
+.qopt.wrong { background: var(--ssd-l); border-color: var(--ssd); color: var(--ssd-d); }
+.qopt:disabled { cursor: default; }
+.qfb { margin-top: .6rem; padding: .65rem .85rem; border-radius: 8px; font-size: .84rem; font-weight: 700; display: none; line-height: 1.55; }
+.qfb.show { display: block; }
+.qfb.good { background: var(--ram-l); color: var(--ram-d); }
+.qfb.bad { background: var(--ssd-l); color: var(--ssd-d); }
+.score-banner { background: #1a1630; border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; color: #fff; display: none; margin-top: 8px; }
+.score-banner.show { display: block; animation: fadeUp .3s ease; }
+.score-stars { font-size: 2rem; letter-spacing: 4px; margin-bottom: .5rem; }
+.score-num { font-size: 3.5rem; font-weight: 900; font-family: 'Space Mono', monospace; line-height: 1; }
+.score-of { font-size: .9rem; opacity: .55; font-weight: 700; margin-top: 2px; }
+.score-msg { font-size: 1.05rem; font-weight: 800; margin-top: .8rem; line-height: 1.4; opacity: .9; }
+.retry-btn { margin-top: 1rem; padding: .6rem 1.8rem; border-radius: 50px; background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.25); color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .9rem; cursor: pointer; transition: background .15s; }
+.retry-btn:hover { background: rgba(255,255,255,.22); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.footer { text-align: center; padding: 1.5rem 1rem; color: var(--text-2); font-size: .78rem; font-weight: 700; opacity: .6; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <span class="hero-chip">💻</span>
+  <h1>Inside Your <span>Computer</span></h1>
+  <p class="hero-sub">Year 5 Science &amp; Computing — explore every part, build your own PC!</p>
+  <div class="hero-badges">
+    <span class="hero-badge">🧠 CPU</span>
+    <span class="hero-badge">⚡ RAM</span>
+    <span class="hero-badge">💾 SSD</span>
+    <span class="hero-badge">🔌 Mainboard</span>
+    <span class="hero-badge">🤝 Together</span>
+    <span class="hero-badge">🔧 Build a PC</span>
+    <span class="hero-badge">🏆 Quiz</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <nav class="nav">
+    <button class="tab on" data-t="cpu"   onclick="show('cpu')">🧠 CPU</button>
+    <button class="tab"    data-t="ram"   onclick="show('ram')">⚡ RAM</button>
+    <button class="tab"    data-t="ssd"   onclick="show('ssd')">💾 SSD</button>
+    <button class="tab"    data-t="mb"    onclick="show('mb')">🔌 Mainboard</button>
+    <button class="tab"    data-t="tog"   onclick="show('tog')">🤝 Together</button>
+    <button class="tab"    data-t="build" onclick="show('build')">🔧 Build a PC</button>
+    <button class="tab"    data-t="quiz"  onclick="show('quiz')">🏆 Quiz</button>
+  </nav>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar-wrap">
+  <div class="progress-bar-inner">
+    <span class="progress-label">Your progress</span>
+    <div class="progress-dots">
+      <div class="pdot current" data-s="cpu"   onclick="show('cpu')"></div>
+      <div class="pdot"         data-s="ram"   onclick="show('ram')"></div>
+      <div class="pdot"         data-s="ssd"   onclick="show('ssd')"></div>
+      <div class="pdot"         data-s="mb"    onclick="show('mb')"></div>
+      <div class="pdot"         data-s="tog"   onclick="show('tog')"></div>
+      <div class="pdot"         data-s="build" onclick="show('build')"></div>
+      <div class="pdot"         data-s="quiz"  onclick="show('quiz')"></div>
+    </div>
+    <span class="progress-pct" id="prog-pct">1 / 7</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════ CPU ═══ -->
+<div class="panel on" id="p-cpu">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#EEEDFE,#d0cef7)">
+      <div class="card-icon" style="background:var(--cpu)">🧠</div>
+      <div>
+        <div class="card-tag" style="color:var(--cpu-d)">Central Processing Unit</div>
+        <div class="card-title" style="color:var(--cpu-d)">The brain of the computer</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">The CPU carries out instructions — every click, keypress and app is the CPU doing millions of tiny jobs one by one at incredible speed. The faster the CPU, the more it can do every second.</p>
+      <div class="analogy" style="background:var(--cpu-l);color:var(--cpu-d)">
+        <span class="analogy-icon">📝</span>
+        <div>The CPU is like your brain doing a <strong>maths test</strong>. You read each question, work it out, write the answer, then move straight to the next. A faster brain = more questions answered per minute. The CPU does this — but billions of times per second!</div>
+      </div>
+      <div class="wow" style="background:var(--cpu-l);border-color:var(--cpu);color:var(--cpu-d)">⚡ <strong>Wow fact:</strong> A modern CPU handles over <strong>3 billion instructions per second</strong> — more than every grain of sand on a beach, done every single second!</div>
+      <div class="facts-grid">
+        <div class="fact" style="background:var(--cpu-l);color:var(--cpu-d)"><div class="fact-label">Speed</div><div class="fact-val">3–5 GHz</div></div>
+        <div class="fact" style="background:var(--cpu-l);color:var(--cpu-d)"><div class="fact-label">Size</div><div class="fact-val">A fingertip!</div></div>
+        <div class="fact" style="background:var(--cpu-l);color:var(--cpu-d)"><div class="fact-label">Cores</div><div class="fact-val">4–16 cores</div></div>
+        <div class="fact" style="background:var(--cpu-l);color:var(--cpu-d)"><div class="fact-label">Gets hot?</div><div class="fact-val">Yes — needs a fan</div></div>
+      </div>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Live CPU instruction pipeline — tasks queue up, get processed, then finish</div>
+      <div style="position:relative">
+        <div class="pipeline" id="pipeline">
+          <div class="pipe-cols">
+            <div>
+              <div class="pipe-col-label">Waiting</div>
+              <div class="pipe-queue" id="pipe-queue"></div>
+            </div>
+            <div class="pipe-cpu-col">
+              <div class="pipe-col-label" style="opacity:.45;font-size:.6rem">CPU</div>
+              <div class="pipe-chip" id="pipe-chip">🧠</div>
+              <div class="pipe-arrow">↑↓</div>
+              <div class="pipe-active" id="pipe-active">Idle</div>
+              <div style="font-size:.6rem;font-weight:800;color:var(--cpu-d);opacity:.5;text-align:center;text-transform:uppercase;letter-spacing:.3px;margin-top:2px">processing</div>
+            </div>
+            <div>
+              <div class="pipe-col-label">Done ✓</div>
+              <div class="pipe-done" id="pipe-done"></div>
+            </div>
+          </div>
+          <div class="pipe-stats">
+            <div class="pipe-stat"><div class="pipe-stat-val" id="stat-done">0</div><div class="pipe-stat-lbl">Completed</div></div>
+            <div class="pipe-stat"><div class="pipe-stat-val" id="stat-queue">0</div><div class="pipe-stat-lbl">Waiting</div></div>
+            <div class="pipe-stat"><div class="pipe-stat-val" id="stat-rate">–</div><div class="pipe-stat-lbl">Per second</div></div>
+          </div>
+        </div>
+        <div class="lag-overlay" id="lag-overlay">
+          <div class="lag-spin"></div>
+          <span style="font-size:.76rem;font-weight:800;color:var(--cpu-d)">Computer lagging…</span>
+          <span style="font-size:.68rem;font-weight:700;color:var(--cpu-d);opacity:.6">Tasks piling up faster than CPU can process!</span>
+        </div>
+      </div>
+      <div class="speed-row">
+        <span style="font-size:.75rem;font-weight:800;color:var(--text-2)">CPU speed:</span>
+        <button class="spbtn" onclick="setSpeed(0,this)">Slow</button>
+        <button class="spbtn on" onclick="setSpeed(1,this)">Normal</button>
+        <button class="spbtn" onclick="setSpeed(2,this)">Turbo!</button>
+      </div>
+      <p style="font-size:.74rem;font-weight:700;color:var(--text-2);margin-top:7px">On <strong>Slow</strong> the queue fills faster than the CPU clears it — that's what a lagging computer feels like. On <strong>Turbo</strong> it handles everything instantly.</p>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('quiz')">🏆 Jump to Quiz</button>
+    <button class="snav-btn next" onclick="show('ram')">Next: RAM ⚡ →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ RAM ═══ -->
+<div class="panel" id="p-ram">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#E1F5EE,#aae8cc)">
+      <div class="card-icon" style="background:var(--ram)">⚡</div>
+      <div>
+        <div class="card-tag" style="color:var(--ram-d)">Random Access Memory</div>
+        <div class="card-title" style="color:var(--ram-d)">Your computer's working space</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">RAM holds everything your computer is using <em>right now</em>. Open too many apps and RAM fills up — the computer slows to a crawl! But when you switch the computer off, RAM forgets everything. Your saved work lives on the SSD instead.</p>
+      <div class="analogy" style="background:var(--ram-l);color:var(--ram-d)">
+        <span class="analogy-icon">📚</span>
+        <div>RAM is like your <strong>school desk</strong>. Spread out the books you need and you can work fast. Pile on too many and there's no room left! When you go home (shut down), the desk clears completely — your work is safely in your bag (the SSD).</div>
+      </div>
+      <div class="wow" style="background:var(--ram-l);border-color:var(--ram);color:var(--ram-d)">⚡ <strong>Wow fact:</strong> RAM is roughly <strong>100× faster</strong> than an SSD. That speed is why apps load into RAM before the CPU uses them — imagine if it had to fetch from the SSD each time!</div>
+      <div class="facts-grid">
+        <div class="fact" style="background:var(--ram-l);color:var(--ram-d)"><div class="fact-label">Typical size</div><div class="fact-val">8–16 GB</div></div>
+        <div class="fact" style="background:var(--ram-l);color:var(--ram-d)"><div class="fact-label">Clears on shutdown?</div><div class="fact-val">Yes — always!</div></div>
+        <div class="fact" style="background:var(--ram-l);color:var(--ram-d)"><div class="fact-label">Speed</div><div class="fact-val">Extremely fast</div></div>
+        <div class="fact" style="background:var(--ram-l);color:var(--ram-d)"><div class="fact-label">More RAM =</div><div class="fact-val">More apps at once</div></div>
+      </div>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Open and close apps — watch RAM fill up!</div>
+      <div class="ram-scene">
+        <div class="ram-desk">
+          <div class="ram-desk-lbl">🖥️ Your desk (RAM — 8 GB)</div>
+          <div class="ram-slots-row" id="ram-desk-row"></div>
+        </div>
+        <div class="ram-bag"><span class="ram-bag-lbl">Apps:</span><div id="ram-app-btns"></div></div>
+      </div>
+      <div style="margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:800;margin-bottom:4px">
+          <span style="color:var(--text-2)">RAM used</span>
+          <span id="ram-gb-txt" style="color:var(--ram-d)">0 / 8 GB</span>
+        </div>
+        <div class="ram-meter-track"><div class="ram-meter-fill" id="ram-fill" style="width:0%;background:var(--ram)"><span class="ram-fill-txt" id="ram-pct-txt"></span></div></div>
+        <p class="ram-msg" id="ram-msg" style="color:var(--text-2)">Open some apps to fill your RAM desk!</p>
+      </div>
+      <button onclick="clearRAM()" style="width:100%;margin-top:7px;padding:.43rem;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;border:2px solid rgba(153,60,29,.2);background:var(--ssd-l);color:var(--ssd-d);transition:all .15s">🔴 Shut down — wipe all RAM</button>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('cpu')">← Back: CPU 🧠</button>
+    <button class="snav-btn next" onclick="show('ssd')">Next: SSD 💾 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SSD ═══ -->
+<div class="panel" id="p-ssd">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#FAECE7,#f5c4a8)">
+      <div class="card-icon" style="background:var(--ssd)">💾</div>
+      <div>
+        <div class="card-tag" style="color:var(--ssd-d)">Solid State Drive</div>
+        <div class="card-title" style="color:var(--ssd-d)">The computer's long-term memory</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">The SSD stores everything permanently — your games, photos, music, and Windows itself. Unlike RAM, it <strong>never forgets</strong> when you shut down. It has no moving parts at all, making it fast, completely silent, and very tough.</p>
+      <div class="analogy" style="background:var(--ssd-l);color:var(--ssd-d)">
+        <span class="analogy-icon">🗄️</span>
+        <div>The SSD is like a <strong>giant filing cabinet</strong>. Everything you save goes in a labelled folder and stays there forever — even overnight or after a shutdown. It holds far more than your desk (RAM), but it's a little slower to open those drawers.</div>
+      </div>
+      <div class="wow" style="background:var(--ssd-l);border-color:var(--ssd);color:var(--ssd-d)">⚡ <strong>Wow fact:</strong> Old computers used Hard Disk Drives with actual <strong>spinning metal discs</strong> inside — like a tiny record player! SSDs replaced them. No spinning = up to 30× faster loading, totally silent, and much harder to break.</div>
+      <div class="facts-grid">
+        <div class="fact" style="background:var(--ssd-l);color:var(--ssd-d)"><div class="fact-label">Typical size</div><div class="fact-val">256 GB – 2 TB</div></div>
+        <div class="fact" style="background:var(--ssd-l);color:var(--ssd-d)"><div class="fact-label">Keeps data when off?</div><div class="fact-val">Yes — always!</div></div>
+        <div class="fact" style="background:var(--ssd-l);color:var(--ssd-d)"><div class="fact-label">Moving parts?</div><div class="fact-val">Zero</div></div>
+        <div class="fact" style="background:var(--ssd-l);color:var(--ssd-d)"><div class="fact-label">vs old HDD</div><div class="fact-val">Up to 30× faster</div></div>
+      </div>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Race — modern SSD vs old spinning hard drive loading Windows!</div>
+      <div class="race-row">
+        <span class="race-label" style="color:var(--ssd-d)">💾 SSD</span>
+        <div class="race-track"><div class="race-fill" id="ssd-race" style="width:0%;background:var(--ssd)"><span class="race-fill-txt" id="ssd-rtxt"></span></div></div>
+        <span class="race-time" id="ssd-rtime" style="color:var(--ssd-d)">–</span>
+      </div>
+      <div class="race-row">
+        <span class="race-label" style="color:#444441">💿 HDD</span>
+        <div class="race-track"><div class="race-fill" id="hdd-race" style="width:0%;background:#888780"><span class="race-fill-txt" id="hdd-rtxt"></span></div></div>
+        <span class="race-time" id="hdd-rtime" style="color:#444441">–</span>
+      </div>
+      <button class="run-btn" id="race-btn" onclick="runRace()" style="background:var(--ssd-l);color:var(--ssd-d);border-color:rgba(153,60,29,.25)">▶ Race! Load Windows</button>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('ram')">← Back: RAM ⚡</button>
+    <button class="snav-btn next" onclick="show('mb')">Next: Mainboard 🔌 →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════ MAINBOARD ═══ -->
+<div class="panel" id="p-mb">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#FAEEDA,#f5d08a)">
+      <div class="card-icon" style="background:var(--mb)">🔌</div>
+      <div>
+        <div class="card-tag" style="color:var(--mb-d)">Motherboard / Mainboard</div>
+        <div class="card-title" style="color:var(--mb-d)">The backbone connecting everything</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">The mainboard is the large green circuit board that every part plugs into. Without it, the CPU, RAM and SSD couldn't talk to each other at all. It carries data through millions of tiny copper pathways called <strong>traces</strong> at nearly the speed of light.</p>
+      <div class="analogy" style="background:var(--mb-l);color:var(--mb-d)">
+        <span class="analogy-icon">🩸</span>
+        <div>Think of the mainboard as your <strong>blood vessels</strong>. Your heart (CPU) pumps blood, but it's the vessels (mainboard traces) that carry it to every organ (RAM, SSD, screen). Without the vessels, nothing gets what it needs — no matter how hard the heart pumps.</div>
+      </div>
+      <div class="wow" style="background:var(--mb-l);border-color:var(--mb);color:var(--mb-d)">⚡ <strong>Wow fact:</strong> Signals travel through a mainboard's copper traces at nearly <strong>the speed of light</strong> — data crosses the whole board in less time than it takes to blink!</div>
+      <div class="facts-grid">
+        <div class="fact" style="background:var(--mb-l);color:var(--mb-d)"><div class="fact-label">Made of</div><div class="fact-val">Fibreglass + copper</div></div>
+        <div class="fact" style="background:var(--mb-l);color:var(--mb-d)"><div class="fact-label">Colour</div><div class="fact-val">Usually green</div></div>
+        <div class="fact" style="background:var(--mb-l);color:var(--mb-d)"><div class="fact-label">Pathways called</div><div class="fact-val">Traces / buses</div></div>
+        <div class="fact" style="background:var(--mb-l);color:var(--mb-d)"><div class="fact-label">Connects</div><div class="fact-val">All parts!</div></div>
+      </div>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Tap a component — watch the signal travel to the CPU along the traces!</div>
+      <svg class="mb-board-svg" viewBox="0 0 320 220" id="mb-svg" style="background:#2d5a1b;border-radius:13px;border:2.5px solid #1a3a0e">
+        <rect x="6" y="6" width="308" height="208" rx="6" fill="#346b20" stroke="#1a3a0e" stroke-width="1"/>
+        <line x1="120" y1="95" x2="40" y2="95" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="40" y1="95" x2="40" y2="160" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="120" y1="95" x2="120" y2="160" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="120" y1="95" x2="200" y2="95" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="200" y1="95" x2="200" y2="160" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="200" y1="95" x2="280" y2="95" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <line x1="280" y1="95" x2="280" y2="55" stroke="#b8860b" stroke-width="1.5" opacity=".25"/>
+        <path id="trace-ram"  d="M 40 155 L 40 95 L 120 95"              fill="none" stroke="#9FE1CB" stroke-width="2.5" stroke-dasharray="6 4" opacity="0" stroke-linecap="round"/>
+        <path id="trace-ssd"  d="M 120 155 L 120 95"                     fill="none" stroke="#F0997B" stroke-width="2.5" stroke-dasharray="6 4" opacity="0" stroke-linecap="round"/>
+        <path id="trace-gpu"  d="M 200 155 L 200 95 L 120 95"            fill="none" stroke="#85B7EB" stroke-width="2.5" stroke-dasharray="6 4" opacity="0" stroke-linecap="round"/>
+        <path id="trace-usb"  d="M 280 55 L 280 95 L 200 95 L 120 95"   fill="none" stroke="#FAC775" stroke-width="2.5" stroke-dasharray="6 4" opacity="0" stroke-linecap="round"/>
+        <path id="trace-bios" d="M 280 155 L 280 95 L 200 95 L 120 95"  fill="none" stroke="#ED93B1" stroke-width="2.5" stroke-dasharray="6 4" opacity="0" stroke-linecap="round"/>
+        <circle id="trace-dot" r="5" fill="#fff" opacity="0"/>
+        <circle cx="155" cy="145" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <circle cx="165" cy="145" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <circle cx="175" cy="145" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <circle cx="155" cy="158" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <circle cx="165" cy="158" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <circle cx="175" cy="158" r="4" fill="none" stroke="rgba(180,160,60,.4)" stroke-width="1.5"/>
+        <rect x="240" y="12" width="28" height="22" rx="2" fill="rgba(150,150,150,.3)" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <line x1="244" y1="12" x2="244" y2="34" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="249" y1="12" x2="249" y2="34" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="254" y1="12" x2="254" y2="34" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="259" y1="12" x2="259" y2="34" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="264" y1="12" x2="264" y2="34" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <rect x="15" y="170" width="120" height="8" rx="2" fill="rgba(55,138,221,.2)" stroke="rgba(55,138,221,.3)" stroke-width="1"/>
+        <text x="75" y="176" text-anchor="middle" font-family="monospace" font-size="5" fill="rgba(100,180,255,.5)" font-weight="bold">PCIe slot</text>
+        <g id="node-cpu">
+          <rect x="92" y="65" width="56" height="56" rx="6" fill="#534AB7" stroke="#7F77DD" stroke-width="1.5"/>
+          <rect x="98" y="71" width="44" height="44" rx="3" fill="#7F77DD"/>
+          <rect x="104" y="77" width="32" height="32" rx="2" fill="#AFA9EC"/>
+          <text x="120" y="96" text-anchor="middle" font-family="monospace" font-size="8" font-weight="bold" fill="#26215C">CPU</text>
+          <text x="120" y="106" text-anchor="middle" font-family="monospace" font-size="5" fill="#3C3489">BRAIN</text>
+          <line x1="92" y1="78" x2="86" y2="78" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="92" y1="84" x2="86" y2="84" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="92" y1="90" x2="86" y2="90" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="148" y1="78" x2="154" y2="78" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="148" y1="84" x2="154" y2="84" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="148" y1="90" x2="154" y2="90" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="104" y1="65" x2="104" y2="59" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="112" y1="65" x2="112" y2="59" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="120" y1="65" x2="120" y2="59" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="128" y1="65" x2="128" y2="59" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="136" y1="65" x2="136" y2="59" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="104" y1="121" x2="104" y2="127" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="112" y1="121" x2="112" y2="127" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="120" y1="121" x2="120" y2="127" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="128" y1="121" x2="128" y2="127" stroke="#534AB7" stroke-width="1.5"/>
+          <line x1="136" y1="121" x2="136" y2="127" stroke="#534AB7" stroke-width="1.5"/>
+        </g>
+        <g id="node-ram" style="cursor:pointer" onclick="activateTrace('ram')">
+          <rect x="14" y="140" width="52" height="40" rx="5" fill="#0F6E56" stroke="#1D9E75" stroke-width="1.5"/>
+          <rect x="18" y="144" width="44" height="28" rx="3" fill="#1D9E75"/>
+          <rect x="21" y="147" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <rect x="32" y="147" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <rect x="43" y="147" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <rect x="21" y="157" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <rect x="32" y="157" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <rect x="43" y="157" width="8" height="6" rx="1" fill="#5DCAA5"/>
+          <text x="40" y="190" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(255,255,255,.6)" font-weight="bold">RAM</text>
+        </g>
+        <g id="node-ssd" style="cursor:pointer" onclick="activateTrace('ssd')">
+          <rect x="88" y="140" width="64" height="26" rx="4" fill="#993C1D" stroke="#D85A30" stroke-width="1.5"/>
+          <rect x="91" y="143" width="58" height="20" rx="2" fill="#D85A30"/>
+          <rect x="94" y="146" width="10" height="8" rx="1" fill="#712B13"/>
+          <rect x="107" y="146" width="10" height="8" rx="1" fill="#712B13"/>
+          <rect x="120" y="146" width="10" height="8" rx="1" fill="#712B13"/>
+          <rect x="133" y="146" width="10" height="8" rx="1" fill="#712B13"/>
+          <text x="120" y="178" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(255,255,255,.6)" font-weight="bold">SSD</text>
+        </g>
+        <g id="node-gpu" style="cursor:pointer" onclick="activateTrace('gpu')">
+          <rect x="172" y="140" width="56" height="40" rx="5" fill="#185FA5" stroke="#378ADD" stroke-width="1.5"/>
+          <rect x="176" y="144" width="48" height="28" rx="3" fill="#378ADD"/>
+          <rect x="179" y="147" width="12" height="10" rx="1" fill="#0C447C"/>
+          <rect x="195" y="147" width="12" height="10" rx="1" fill="#0C447C"/>
+          <rect x="211" y="147" width="9" height="10" rx="1" fill="#0C447C"/>
+          <line x1="179" y1="162" x2="220" y2="162" stroke="#0C447C" stroke-width="1.5"/>
+          <line x1="179" y1="166" x2="220" y2="166" stroke="#0C447C" stroke-width="1.5"/>
+          <text x="200" y="190" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(255,255,255,.6)" font-weight="bold">GPU</text>
+        </g>
+        <g id="node-usb" style="cursor:pointer" onclick="activateTrace('usb')">
+          <rect x="265" y="14" width="32" height="38" rx="4" fill="#854F0B" stroke="#BA7517" stroke-width="1.5"/>
+          <rect x="268" y="18" width="11" height="8" rx="1" fill="#633806"/>
+          <rect x="268" y="29" width="11" height="8" rx="1" fill="#633806"/>
+          <rect x="268" y="40" width="11" height="8" rx="1" fill="#633806"/>
+          <rect x="282" y="18" width="11" height="8" rx="1" fill="#633806"/>
+          <rect x="282" y="29" width="11" height="8" rx="1" fill="#633806"/>
+          <text x="281" y="60" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(255,255,255,.6)" font-weight="bold">USB</text>
+        </g>
+        <g id="node-bios" style="cursor:pointer" onclick="activateTrace('bios')">
+          <rect x="254" y="140" width="48" height="30" rx="4" fill="#3B6D11" stroke="#639922" stroke-width="1.5"/>
+          <rect x="258" y="144" width="40" height="22" rx="2" fill="#639922"/>
+          <text x="278" y="158" text-anchor="middle" font-family="monospace" font-size="7" fill="#173404" font-weight="bold">BIOS</text>
+          <text x="278" y="166" text-anchor="middle" font-family="monospace" font-size="5" fill="#27500A">CHIP</text>
+          <text x="278" y="182" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(255,255,255,.6)" font-weight="bold">BIOS</text>
+        </g>
+        <circle id="cpu-glow" cx="120" cy="93" r="38" fill="none" stroke="#fff" stroke-width="2" opacity="0"/>
+      </svg>
+      <div class="mb-parts-grid">
+        <button class="mb-part-btn" style="background:var(--ram-l);color:var(--ram-d);border-color:rgba(15,110,86,.2)"     onclick="activateTrace('ram')">⚡ RAM — send data</button>
+        <button class="mb-part-btn" style="background:var(--ssd-l);color:var(--ssd-d);border-color:rgba(153,60,29,.2)"    onclick="activateTrace('ssd')">💾 SSD — load file</button>
+        <button class="mb-part-btn" style="background:#E6F1FB;color:#042C53;border-color:rgba(24,95,165,.2)"              onclick="activateTrace('gpu')">🖥️ GPU — send frame</button>
+        <button class="mb-part-btn" style="background:var(--mb-l);color:var(--mb-d);border-color:rgba(133,79,11,.2)"      onclick="activateTrace('usb')">🔌 USB — keypress</button>
+        <button class="mb-part-btn" style="background:#EAF3DE;color:#173404;border-color:rgba(99,153,34,.2);grid-column:span 2" onclick="activateTrace('bios')">📡 BIOS chip — power on!</button>
+      </div>
+      <div class="mb-info-panel" id="mb-info">👆 Tap any component above to send a signal along the mainboard — watch it travel to the CPU!</div>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('ssd')">← Back: SSD 💾</button>
+    <button class="snav-btn next" onclick="show('tog')">Next: Together 🤝 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TOGETHER ═══ -->
+<div class="panel" id="p-tog">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#E6F1FB,#b5d8f7)">
+      <div class="card-icon" style="background:var(--tog)">🤝</div>
+      <div>
+        <div class="card-tag" style="color:var(--tog-d)">How they work as a team</div>
+        <div class="card-title" style="color:var(--tog-d)">No part can work alone!</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">Every time you do something on a computer, all four parts work together instantly. Pick a scenario — watch each part light up as it takes its turn, then review the full step list to talk about what happened.</p>
+      <div class="analogy" style="background:var(--tog-l);color:var(--tog-d)">
+        <span class="analogy-icon">⚽</span>
+        <div>They're like a <strong>football team</strong>. The CPU is the striker making decisions, RAM is the midfield passing data fast, SSD is the coach's notes looked up when needed, and the Mainboard is the pitch — connecting them all so they can play together!</div>
+      </div>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Choose a scenario — watch each part light up, then review all the steps!</div>
+      <div class="tog-scene">
+        <div class="parts-grid">
+          <div class="tpart" id="tp-cpu" style="background:var(--cpu-l);color:var(--cpu-d)"><div class="tpart-pulse" style="background:var(--cpu)"></div><span class="tpart-icon">🧠</span><div class="tpart-name">CPU</div><div class="tpart-status" id="ts-cpu">Waiting…</div></div>
+          <div class="tpart" id="tp-ram" style="background:var(--ram-l);color:var(--ram-d)"><div class="tpart-pulse" style="background:var(--ram)"></div><span class="tpart-icon">⚡</span><div class="tpart-name">RAM</div><div class="tpart-status" id="ts-ram">Waiting…</div></div>
+          <div class="tpart" id="tp-ssd" style="background:var(--ssd-l);color:var(--ssd-d)"><div class="tpart-pulse" style="background:var(--ssd)"></div><span class="tpart-icon">💾</span><div class="tpart-name">SSD</div><div class="tpart-status" id="ts-ssd">Waiting…</div></div>
+          <div class="tpart" id="tp-mb"  style="background:var(--mb-l);color:var(--mb-d)"><div class="tpart-pulse" style="background:var(--mb)"></div><span class="tpart-icon">🔌</span><div class="tpart-name">Mainboard</div><div class="tpart-status" id="ts-mb">Waiting…</div></div>
+        </div>
+        <div class="event-display" id="event-display"><span style="color:var(--text-2);font-size:.84rem">Pick a scenario below to get started!</span></div>
+        <div class="progress-strip"><div class="progress-fill-tog" id="progress-fill" style="width:0%"></div></div>
+        <div class="tog-log" id="tog-log">
+          <div class="tog-log-header">📋 What just happened — step by step</div>
+          <div class="tog-log-body" id="tog-log-body"></div>
+          <button class="log-discuss-btn" id="log-discuss-btn">💬 Discuss this with your teacher ↗</button>
+        </div>
+      </div>
+      <div class="sc-btns">
+        <button class="sc-btn" id="scb-game"  onclick="runScenario('game',this)">🎮 Open a game</button>
+        <button class="sc-btn" id="scb-photo" onclick="runScenario('photo',this)">📸 Save a photo</button>
+        <button class="sc-btn" id="scb-type"  onclick="runScenario('type',this)">⌨️ Type a letter</button>
+        <button class="sc-btn" id="scb-boot"  onclick="runScenario('boot',this)">🔵 Turn on computer</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('mb')">← Back: Mainboard 🔌</button>
+    <button class="snav-btn next" onclick="show('build')">Next: Build a PC 🔧 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ BUILD A PC ═══ -->
+<div class="panel" id="p-build">
+  <div class="card">
+    <div class="card-head" style="background:linear-gradient(135deg,#e8f5e2,#c5e3b8)">
+      <div class="card-icon" style="background:var(--build-g)">🔧</div>
+      <div>
+        <div class="card-tag" style="color:var(--build-d)">PC Builder Challenge</div>
+        <div class="card-title" style="color:var(--build-d)">Build your own computer!</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="desc">A computer needs four key parts. The <strong>Mainboard</strong> is already installed in the green PCB below. Now drag the CPU, RAM and SSD to their correct slots. Each part has a unique shape — can you work out where each one goes?</p>
+    </div>
+    <div class="iarea">
+      <div class="ilabel">Drag each part to its correct slot on the motherboard</div>
+      <div style="margin-bottom:12px">
+        <p style="font-size:.84rem;font-weight:700;color:var(--text-2);padding:0 2px">Drag these components onto the green motherboard — each has its own special slot!</p>
+      </div>
+      <div class="parts-shelf" id="parts-shelf">
+        <div class="part-chip" id="drag-cpu" draggable="true" style="background:var(--cpu-l);color:var(--cpu-d);border-color:rgba(83,74,183,.25)" ondragstart="dStart(event,'cpu')">
+          <svg width="56" height="56" viewBox="0 0 56 56">
+            <rect x="12" y="12" width="32" height="32" rx="4" fill="#534AB7"/>
+            <rect x="16" y="16" width="24" height="24" rx="2" fill="#7F77DD"/>
+            <rect x="19" y="19" width="18" height="18" rx="1" fill="#AFA9EC"/>
+            <rect x="22" y="22" width="12" height="12" rx="1" fill="#534AB7"/>
+            <text x="28" y="31" text-anchor="middle" font-family="monospace" font-size="7" font-weight="bold" fill="#fff">CPU</text>
+            <line x1="6" y1="20" x2="12" y2="20" stroke="#534AB7" stroke-width="2"/>
+            <line x1="6" y1="24" x2="12" y2="24" stroke="#534AB7" stroke-width="2"/>
+            <line x1="6" y1="28" x2="12" y2="28" stroke="#534AB7" stroke-width="2"/>
+            <line x1="6" y1="32" x2="12" y2="32" stroke="#534AB7" stroke-width="2"/>
+            <line x1="6" y1="36" x2="12" y2="36" stroke="#534AB7" stroke-width="2"/>
+            <line x1="44" y1="20" x2="50" y2="20" stroke="#534AB7" stroke-width="2"/>
+            <line x1="44" y1="24" x2="50" y2="24" stroke="#534AB7" stroke-width="2"/>
+            <line x1="44" y1="28" x2="50" y2="28" stroke="#534AB7" stroke-width="2"/>
+            <line x1="44" y1="32" x2="50" y2="32" stroke="#534AB7" stroke-width="2"/>
+            <line x1="44" y1="36" x2="50" y2="36" stroke="#534AB7" stroke-width="2"/>
+            <line x1="20" y1="6" x2="20" y2="12" stroke="#534AB7" stroke-width="2"/>
+            <line x1="24" y1="6" x2="24" y2="12" stroke="#534AB7" stroke-width="2"/>
+            <line x1="28" y1="6" x2="28" y2="12" stroke="#534AB7" stroke-width="2"/>
+            <line x1="32" y1="6" x2="32" y2="12" stroke="#534AB7" stroke-width="2"/>
+            <line x1="36" y1="6" x2="36" y2="12" stroke="#534AB7" stroke-width="2"/>
+            <line x1="20" y1="44" x2="20" y2="50" stroke="#534AB7" stroke-width="2"/>
+            <line x1="24" y1="44" x2="24" y2="50" stroke="#534AB7" stroke-width="2"/>
+            <line x1="28" y1="44" x2="28" y2="50" stroke="#534AB7" stroke-width="2"/>
+            <line x1="32" y1="44" x2="32" y2="50" stroke="#534AB7" stroke-width="2"/>
+            <line x1="36" y1="44" x2="36" y2="50" stroke="#534AB7" stroke-width="2"/>
+          </svg>
+          <span>CPU</span>
+        </div>
+        <div class="part-chip" id="drag-ram" draggable="true" style="background:var(--ram-l);color:var(--ram-d);border-color:rgba(15,110,86,.25)" ondragstart="dStart(event,'ram')">
+          <svg width="28" height="72" viewBox="0 0 28 72">
+            <rect x="2" y="4" width="24" height="64" rx="2" fill="#0F6E56"/>
+            <rect x="5" y="6" width="18" height="60" rx="1" fill="#1D9E75"/>
+            <rect x="7" y="10" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="16" y="10" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="7" y="20" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="16" y="20" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="7" y="30" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="16" y="30" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="7" y="40" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="16" y="40" width="5" height="5" rx="1" fill="#5DCAA5"/>
+            <rect x="3" y="55" width="22" height="10" rx="1" fill="#085041"/>
+            <rect x="5" y="65" width="3" height="6" rx="0" fill="#085041"/>
+            <rect x="9" y="65" width="3" height="6" rx="0" fill="#085041"/>
+            <rect x="13" y="65" width="3" height="6" rx="0" fill="#085041"/>
+            <rect x="17" y="65" width="3" height="6" rx="0" fill="#085041"/>
+            <rect x="21" y="65" width="3" height="6" rx="0" fill="#085041"/>
+          </svg>
+          <span>RAM</span>
+        </div>
+        <div class="part-chip" id="drag-ssd" draggable="true" style="background:var(--ssd-l);color:var(--ssd-d);border-color:rgba(153,60,29,.25)" ondragstart="dStart(event,'ssd')">
+          <svg width="72" height="36" viewBox="0 0 72 36">
+            <rect x="1" y="1" width="70" height="34" rx="3" fill="#993C1D"/>
+            <rect x="3" y="3" width="66" height="30" rx="2" fill="#D85A30"/>
+            <rect x="6" y="7" width="12" height="10" rx="1" fill="#712B13"/>
+            <rect x="22" y="7" width="12" height="10" rx="1" fill="#712B13"/>
+            <rect x="38" y="7" width="12" height="10" rx="1" fill="#712B13"/>
+            <rect x="6" y="20" width="8" height="8" rx="1" fill="#712B13"/>
+            <rect x="18" y="20" width="8" height="8" rx="1" fill="#712B13"/>
+            <rect x="30" y="20" width="8" height="8" rx="1" fill="#712B13"/>
+            <rect x="42" y="20" width="8" height="8" rx="1" fill="#712B13"/>
+            <text x="58" y="17" text-anchor="middle" font-family="monospace" font-size="6" font-weight="bold" fill="#FAECE7">SSD</text>
+            <rect x="54" y="2" width="14" height="32" rx="2" fill="#712B13" opacity=".5"/>
+            <rect x="55" y="8"  width="12" height="2" rx="1" fill="#F0997B" opacity=".6"/>
+            <rect x="55" y="12" width="12" height="2" rx="1" fill="#F0997B" opacity=".6"/>
+            <rect x="55" y="16" width="12" height="2" rx="1" fill="#F0997B" opacity=".6"/>
+            <rect x="55" y="20" width="12" height="2" rx="1" fill="#F0997B" opacity=".6"/>
+          </svg>
+          <span>SSD</span>
+        </div>
+      </div>
+
+      <div class="mobo-canvas" id="mobo-canvas">
+        <div class="mobo-inner"></div>
+        <div class="mobo-traces" id="mobo-traces">
+          <div class="trace h" style="left:8%;top:22%;width:18%"></div>
+          <div class="trace h" style="left:8%;top:28%;width:18%"></div>
+          <div class="trace v" style="left:26%;top:15%;height:20%"></div>
+          <div class="trace h" style="left:55%;top:55%;width:30%"></div>
+          <div class="trace v" style="left:55%;top:55%;height:20%"></div>
+          <div class="trace h" style="left:10%;top:72%;width:40%"></div>
+          <div class="trace v" style="left:10%;top:65%;height:15%"></div>
+          <div class="trace h" style="right:8%;top:35%;width:25%"></div>
+          <div class="trace v" style="right:20%;top:20%;height:18%"></div>
+          <div class="trace h" style="left:40%;top:15%;width:25%"></div>
+        </div>
+        <div class="mobo-cap" style="left:8%;top:48%"></div>
+        <div class="mobo-cap" style="left:12%;top:48%"></div>
+        <div class="mobo-cap" style="left:16%;top:48%"></div>
+        <div class="mobo-cap" style="left:8%;top:54%"></div>
+        <div class="mobo-cap" style="left:12%;top:54%"></div>
+        <div class="mobo-cap" style="right:8%;top:60%"></div>
+        <div class="mobo-cap" style="right:12%;top:60%"></div>
+        <div class="mobo-cap" style="right:8%;top:65%"></div>
+        <div class="mobo-heatsink" style="left:8%;top:10%;width:14%;height:8%"></div>
+        <div style="position:absolute;left:8%;top:10%;width:14%;height:8%;display:flex;align-items:center;justify-content:center"><span class="chip-label">BIOS</span></div>
+        <div style="position:absolute;right:3%;top:30%;width:14%;height:14%;background:rgba(200,160,0,.15);border-radius:3px;border:1px solid rgba(255,200,0,.2);display:flex;align-items:center;justify-content:center"><span class="chip-label" style="font-size:.52rem">PWR</span></div>
+        <div style="position:absolute;right:2%;top:10%;display:flex;flex-direction:column;gap:3px">
+          <div class="mobo-port" style="width:14px;height:9px"></div>
+          <div class="mobo-port" style="width:14px;height:9px"></div>
+          <div class="mobo-port" style="width:14px;height:9px"></div>
+        </div>
+        <div class="mobo-slot" id="slot-cpu" style="left:26%;top:12%;width:34%;height:30%" ondragover="dOver(event)" ondrop="dDrop(event,'cpu')" ondragleave="dLeave(event)">
+          <span class="slot-hint" id="slot-cpu-hint">CPU<br>socket</span>
+        </div>
+        <div class="mobo-slot" id="slot-ram" style="right:4%;top:10%;width:14%;height:42%" ondragover="dOver(event)" ondrop="dDrop(event,'ram')" ondragleave="dLeave(event)">
+          <span class="slot-hint" id="slot-ram-hint" style="writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">RAM slot</span>
+        </div>
+        <div class="mobo-slot" id="slot-ssd" style="left:10%;bottom:8%;width:55%;height:18%" ondragover="dOver(event)" ondrop="dDrop(event,'ssd')" ondragleave="dLeave(event)">
+          <span class="slot-hint" id="slot-ssd-hint">SSD slot (M.2)</span>
+        </div>
+        <div style="position:absolute;left:10%;bottom:28%;width:55%;height:10%;background:rgba(55,138,221,.1);border-radius:2px;border:1px solid rgba(55,138,221,.2);display:flex;align-items:center;padding-left:6px"><span class="chip-label" style="color:rgba(100,180,255,.5)">PCIe — video card slot</span></div>
+      </div>
+
+      <div class="build-status-row" id="build-status-row">
+        <span class="build-badge empty" id="bb-cpu">🧠 CPU</span>
+        <span class="build-badge empty" id="bb-ram">⚡ RAM</span>
+        <span class="build-badge empty" id="bb-ssd">💾 SSD</span>
+        <button class="power-btn" id="power-btn" onclick="powerOn()">⚡ Power On!</button>
+      </div>
+      <div class="boot-screen" id="boot-screen"></div>
+      <button class="reset-btn" onclick="resetBuild()">↺ Start over</button>
+    </div>
+  </div>
+  <div class="section-nav">
+    <button class="snav-btn" onclick="show('tog')">← Back: Together 🤝</button>
+    <button class="snav-btn next" onclick="show('quiz')">Next: Quiz 🏆 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ QUIZ ═══ -->
+<div class="panel" id="p-quiz">
+  <div class="quiz-intro">
+    <span class="quiz-intro-icon">🏆</span>
+    <div class="quiz-intro-title">Knowledge Check!</div>
+    <div class="quiz-intro-sub">You've explored all four parts — now test what you've learned. 7 questions, instant feedback on every answer.</div>
+  </div>
+  <div class="q-number-wrap" id="q-pips"></div>
+  <div id="quiz-wrap"></div>
+  <div class="score-banner" id="score-banner"></div>
+  <div class="section-nav" style="margin-top:12px">
+    <button class="snav-btn" onclick="show('build')">← Back: Build a PC 🔧</button>
+    <button class="snav-btn" onclick="show('cpu')">↺ Start over from CPU</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="footer">Inside Your Computer — Year 5 Learning Resource</div>
+
+<script>
+/* ═══════════ NAVIGATION & PROGRESS ═══════════ */
+const SECTIONS = ['cpu','ram','ssd','mb','tog','build','quiz'];
+const visited = new Set(['cpu']);
+
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.pdot').forEach(d => { d.classList.remove('current'); d.classList.toggle('visited', visited.has(d.dataset.s)); });
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelector('[data-t='+id+']').classList.add('on');
+  visited.add(id);
+  document.querySelectorAll('.pdot').forEach(d => { d.classList.toggle('visited', visited.has(d.dataset.s)); d.classList.toggle('current', d.dataset.s === id); });
+  document.getElementById('prog-pct').textContent = (SECTIONS.indexOf(id)+1) + ' / ' + SECTIONS.length;
+  if (id === 'quiz') buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════ CPU PIPELINE ═══════════ */
+const ALL_TASKS = [
+  {label:'47 × 93',icon:'🔢',color:'#534AB7'},{label:'Draw pixel',icon:'🎨',color:'#7F77DD'},
+  {label:'Key press',icon:'⌨️',color:'#0F6E56'},{label:'Load sprite',icon:'🎮',color:'#993C1D'},
+  {label:'Play sound',icon:'🔊',color:'#854F0B'},{label:'Check WiFi',icon:'📶',color:'#185FA5'},
+  {label:'2048 ÷ 8',icon:'🔢',color:'#534AB7'},{label:'Render frame',icon:'🖥️',color:'#3B6D11'},
+  {label:'Mouse move',icon:'🖱️',color:'#7F77DD'},{label:'Save file',icon:'💾',color:'#993C1D'},
+  {label:'Scroll page',icon:'📜',color:'#854F0B'},{label:'Read RAM',icon:'⚡',color:'#0F6E56'},
+];
+const SPEEDS = [
+  {ms:1800,label:'Slow',maxQueue:6},
+  {ms:700, label:'Normal',maxQueue:3},
+  {ms:180, label:'Turbo!',maxQueue:1},
+];
+let speedIdx=1, waitQueue=[], doneList=[], totalDone=0, taskIdx=0, processing=false, rateCount=0;
+let taskTimer=null, rateTimer=null;
+
+function buildQueue() {
+  waitQueue = [];
+  for(let i=0;i<4;i++) waitQueue.push(ALL_TASKS[(taskIdx++)%ALL_TASKS.length]);
+  renderQueue();
+}
+function renderQueue() {
+  const qEl=document.getElementById('pipe-queue'), dEl=document.getElementById('pipe-done');
+  if(!qEl||!dEl) return;
+  qEl.innerHTML='';
+  waitQueue.slice(0,7).forEach(t => {
+    const d=document.createElement('div'); d.className='pipe-task waiting';
+    d.innerHTML=`<div class="task-dot" style="background:${t.color}"></div>${t.icon} ${t.label}`;
+    qEl.appendChild(d);
+  });
+  dEl.innerHTML='';
+  [...doneList].slice(-6).reverse().forEach(t => {
+    const d=document.createElement('div'); d.className='pipe-task done-item';
+    d.innerHTML=`<div class="task-dot" style="background:#1D9E75"></div>✓ ${t.label}`;
+    dEl.appendChild(d);
+  });
+  document.getElementById('stat-done').textContent = totalDone;
+  document.getElementById('stat-queue').textContent = waitQueue.length;
+}
+function processNext() {
+  if(processing||waitQueue.length===0) return;
+  processing=true;
+  const task=waitQueue.shift(); renderQueue();
+  const active=document.getElementById('pipe-active'), chip=document.getElementById('pipe-chip');
+  if(active){active.textContent=task.icon+' '+task.label;active.classList.add('processing');active.style.background=task.color;}
+  if(chip) chip.classList.add('crunch');
+  setTimeout(()=>{if(chip)chip.classList.remove('crunch');},250);
+  setTimeout(()=>{
+    doneList.push(task); if(doneList.length>12) doneList.shift();
+    totalDone++; rateCount++;
+    if(active){active.textContent='Idle';active.classList.remove('processing');active.style.background='var(--cpu)';}
+    processing=false; renderQueue();
+    while(waitQueue.length < SPEEDS[speedIdx].maxQueue+2) waitQueue.push(ALL_TASKS[(taskIdx++)%ALL_TASKS.length]);
+    renderQueue();
+  }, SPEEDS[speedIdx].ms);
+}
+function setSpeed(idx,btn) {
+  speedIdx=idx;
+  document.querySelectorAll('.spbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lag-overlay').classList.toggle('show', idx===0);
+  clearInterval(taskTimer);
+  while(waitQueue.length < SPEEDS[idx].maxQueue+2) waitQueue.push(ALL_TASKS[(taskIdx++)%ALL_TASKS.length]);
+  startPipeline();
+}
+function startPipeline() {
+  if(taskTimer) clearInterval(taskTimer);
+  if(rateTimer) clearInterval(rateTimer);
+  taskTimer = setInterval(()=>processNext(), SPEEDS[speedIdx].ms+50);
+  rateTimer = setInterval(()=>{ const r=document.getElementById('stat-rate'); if(r) r.textContent=rateCount+'/s'; rateCount=0; }, 1000);
+}
+buildQueue(); startPipeline();
+
+/* ═══════════ RAM ═══════════ */
+const APPS=[
+  {id:'game',icon:'🎮',name:'Game',gb:2.8,color:'#534AB7'},
+  {id:'browser',icon:'🌐',name:'Browser',gb:1.2,color:'#185FA5'},
+  {id:'music',icon:'🎵',name:'Music',gb:0.4,color:'#0F6E56'},
+  {id:'word',icon:'📝',name:'Word doc',gb:0.6,color:'#854F0B'},
+  {id:'email',icon:'📧',name:'Email',gb:0.3,color:'#639922'}
+];
+const RAM_TOTAL=8; let ramOpen={};
+function buildRAMApps() {
+  const desk=document.getElementById('ram-desk-row'), btns=document.getElementById('ram-app-btns');
+  if(!desk||!btns) return;
+  desk.innerHTML=''; btns.innerHTML='';
+  APPS.forEach((a,i) => {
+    if(ramOpen[i]) { const b=document.createElement('div'); b.className='ram-book'; b.style.cssText='background:'+a.color+';color:#fff'; b.innerHTML=a.icon+' <span>'+a.name+'</span><span style="font-size:.65rem;opacity:.75;margin-left:3px">'+a.gb+'GB</span>'; desk.appendChild(b); }
+    const btn=document.createElement('button');
+    btn.style.cssText='padding:.3rem .68rem;border-radius:50px;font-family:Nunito,sans-serif;font-weight:800;font-size:.75rem;border:2px solid rgba(15,110,86,.2);cursor:pointer;transition:all .15s;margin:3px;background:'+(ramOpen[i]?'var(--ssd-l)':'var(--ram-l)')+';color:'+(ramOpen[i]?'var(--ssd-d)':'var(--ram-d)');
+    btn.textContent=(ramOpen[i]?'✕ Close ':'+ Open ')+a.icon+' '+a.name;
+    btn.onclick=()=>{ramOpen[i]=!ramOpen[i];buildRAMApps();};
+    btns.appendChild(btn);
+  });
+  let total=0; APPS.forEach((a,i)=>{if(ramOpen[i])total+=a.gb;});
+  const pct=Math.min(100,Math.round((total/RAM_TOTAL)*100));
+  const fill=document.getElementById('ram-fill'), pctTxt=document.getElementById('ram-pct-txt'), gbTxt=document.getElementById('ram-gb-txt'), msg=document.getElementById('ram-msg');
+  if(fill){fill.style.width=pct+'%';fill.style.background=pct>87?'#D85A30':pct>65?'#BA7517':'var(--ram)';}
+  if(pctTxt) pctTxt.textContent=pct>14?pct+'%':'';
+  if(gbTxt) gbTxt.textContent=total.toFixed(1)+' / 8 GB';
+  if(msg){if(pct>=90){msg.textContent='🚨 RAM nearly full! Computer will lag.';msg.style.color='#D85A30';}else if(pct>65){msg.textContent='⚠️ '+pct+'% used — getting crowded!';msg.style.color='#BA7517';}else if(pct>0){msg.textContent='✅ '+pct+'% used — running smoothly!';msg.style.color='var(--ram-d)';}else{msg.textContent='Open some apps to fill your RAM desk!';msg.style.color='var(--text-2)';}}
+}
+function clearRAM(){ramOpen={};buildRAMApps();}
+buildRAMApps();
+
+/* ═══════════ SSD RACE ═══════════ */
+let raceRunning=false;
+function runRace() {
+  if(raceRunning) return;
+  raceRunning=true;
+  const btn=document.getElementById('race-btn');
+  if(btn){btn.textContent='Racing…';btn.style.opacity='.6';}
+  const sF=document.getElementById('ssd-race'),hF=document.getElementById('hdd-race'),sT=document.getElementById('ssd-rtxt'),hT=document.getElementById('hdd-rtxt'),sTime=document.getElementById('ssd-rtime'),hTime=document.getElementById('hdd-rtime');
+  if(sF)sF.style.width='0%';if(hF)hF.style.width='0%';if(sTime)sTime.textContent='–';if(hTime)hTime.textContent='–';
+  let sv=0,hv=0,el=0,sDone=false,hDone=false;
+  const iv=setInterval(()=>{
+    el+=16;
+    if(!sDone){sv=Math.min(100,sv+8.3);if(sF)sF.style.width=sv+'%';if(sT)sT.textContent=Math.round(sv)+'%';if(sv>=100&&!sDone){sDone=true;if(sTime)sTime.textContent=(el/1000).toFixed(1)+'s ⚡';if(sT)sT.textContent='Done! ';}}
+    if(!hDone){hv=Math.min(100,hv+0.27);if(hF)hF.style.width=hv+'%';if(hT)hT.textContent=Math.round(hv)+'%';if(hv>=100&&!hDone){hDone=true;if(hTime)hTime.textContent=(el/1000).toFixed(1)+'s';if(hT)hT.textContent='Done';}}
+    if(sDone&&hDone){clearInterval(iv);raceRunning=false;if(btn){btn.textContent='▶ Race again!';btn.style.opacity='1';}}
+  },16);
+}
+
+/* ═══════════ MAINBOARD TRACES ═══════════ */
+const MB_INFO = {
+  ram: {title:'RAM → CPU',msg:'⚡ RAM sends data directly to the CPU through the mainboard\'s memory bus — one of the fastest pathways on the whole board. This happens millions of times per second!',color:'#1D9E75'},
+  ssd: {title:'SSD → CPU',msg:'💾 The SSD sends a file along the M.2 trace to the CPU. The CPU loads it into RAM so it can be used quickly. SSD data travels at up to 3,500 MB/s!',color:'#D85A30'},
+  gpu: {title:'GPU → screen',msg:'🖥️ The GPU (graphics card) builds each frame and sends it to your screen. The mainboard\'s PCIe slot has dedicated fast lanes — your game needs to do this 60 times per second!',color:'#378ADD'},
+  usb: {title:'USB → CPU',msg:'🔌 You pressed a key! The keyboard sends a signal through the USB port. The mainboard carries it to the CPU, which identifies the key in under 1 millisecond.',color:'#BA7517'},
+  bios:{title:'BIOS → CPU',msg:'📡 Power on! The BIOS chip runs first — before anything else. It checks every part is connected, then tells the CPU to start loading Windows from the SSD.',color:'#639922'},
+};
+const TRACE_POINTS = {
+  ram: [{x:40,y:160},{x:40,y:95},{x:120,y:95}],
+  ssd: [{x:120,y:140},{x:120,y:95}],
+  gpu: [{x:200,y:155},{x:200,y:95},{x:120,y:95}],
+  usb: [{x:281,y:52},{x:281,y:95},{x:200,y:95},{x:120,y:95}],
+  bios:[{x:278,y:140},{x:278,y:95},{x:200,y:95},{x:120,y:95}],
+};
+let traceActive=false;
+function activateTrace(part) {
+  if(traceActive) return;
+  traceActive=true;
+  const info=MB_INFO[part], panel=document.getElementById('mb-info');
+  if(panel) panel.innerHTML='<strong style="color:'+info.color+'">'+info.title+':</strong> '+info.msg;
+  const path=document.getElementById('trace-'+part);
+  if(path){path.setAttribute('opacity','1');path.style.animation='flowTrace .5s linear infinite';}
+  animateDot(part,info.color,()=>{
+    const glow=document.getElementById('cpu-glow');
+    if(glow){glow.setAttribute('stroke',info.color);glow.setAttribute('opacity','0.8');glow.style.animation='cpuGlowPop .4s ease forwards';}
+    setTimeout(()=>{
+      if(glow){glow.setAttribute('opacity','0');glow.style.animation='';}
+      if(path){path.setAttribute('opacity','0');path.style.animation='';}
+      traceActive=false;
+    },800);
+  });
+}
+function animateDot(part,color,onDone) {
+  const dot=document.getElementById('trace-dot'), pts=TRACE_POINTS[part];
+  if(!dot||!pts) return;
+  dot.setAttribute('fill',color); dot.setAttribute('opacity','1');
+  dot.setAttribute('cx',pts[0].x); dot.setAttribute('cy',pts[0].y);
+  let seg=0;
+  function moveToNext() {
+    if(seg>=pts.length-1){dot.setAttribute('opacity','0');onDone();return;}
+    const from=pts[seg],to=pts[seg+1];
+    const dist=Math.sqrt(Math.pow(to.x-from.x,2)+Math.pow(to.y-from.y,2));
+    const steps=Math.max(12,Math.round(dist/3));
+    const dur=Math.max(180,dist*2.5);
+    let step=0;
+    const iv=setInterval(()=>{
+      step++; const t=step/steps;
+      dot.setAttribute('cx',from.x+(to.x-from.x)*t);
+      dot.setAttribute('cy',from.y+(to.y-from.y)*t);
+      if(step>=steps){clearInterval(iv);seg++;moveToNext();}
+    },dur/steps);
+  }
+  moveToNext();
+}
+const traceStyle=document.createElement('style');
+traceStyle.textContent='@keyframes flowTrace{to{stroke-dashoffset:-20}}@keyframes cpuGlowPop{0%{r:38;opacity:.8;stroke-width:3}100%{r:52;opacity:0;stroke-width:1}}';
+document.head.appendChild(traceStyle);
+
+/* ═══════════ TOGETHER ═══════════ */
+const SCENARIOS = {
+  game:[
+    {part:'mb',status:'Routing "open game" signal…',msg:'🔌 Mainboard carries the "open game" command from the keyboard through its copper traces to the CPU.',color:'#854F0B'},
+    {part:'cpu',status:'Reading launch instructions…',msg:'🧠 CPU receives the command and works out it needs to find the game files — stored on the SSD.',color:'#534AB7'},
+    {part:'mb',status:'Sending request to SSD…',msg:'🔌 Mainboard routes the CPU\'s request for game files down through the SSD slot connector.',color:'#854F0B'},
+    {part:'ssd',status:'Finding game files…',msg:'💾 SSD searches its storage and starts sending the game files back along the mainboard.',color:'#993C1D'},
+    {part:'mb',status:'Carrying data to RAM…',msg:'🔌 Game data travels from SSD, along the mainboard\'s data bus, up into the RAM slots.',color:'#854F0B'},
+    {part:'ram',status:'Loading game into memory…',msg:'⚡ RAM holds all the game files ready for instant access — much faster than fetching from SSD each time!',color:'#0F6E56'},
+    {part:'cpu',status:'Running the game! 🎮',msg:'🧠 CPU reads from RAM at lightning speed, running thousands of game instructions every second. You\'re playing!',color:'#534AB7'},
+  ],
+  photo:[
+    {part:'cpu',status:'Detected: you clicked Save!',msg:'🧠 CPU spots the Save button click and prepares to write the photo permanently to storage.',color:'#534AB7'},
+    {part:'ram',status:'Grabbing photo from memory…',msg:'⚡ The photo currently lives in RAM. RAM hands the photo data to the CPU, ready for saving.',color:'#0F6E56'},
+    {part:'mb',status:'Routing photo to SSD…',msg:'🔌 Mainboard carries the photo data along its copper traces down to the SSD slot.',color:'#854F0B'},
+    {part:'ssd',status:'Writing permanently… 📸',msg:'💾 SSD receives the photo and writes it into its memory chips permanently. It will survive shutdown!',color:'#993C1D'},
+    {part:'cpu',status:'Save confirmed! ✅',msg:'🧠 CPU checks the SSD confirmed the save, then updates the screen to show "Saved". All done!',color:'#534AB7'},
+  ],
+  type:[
+    {part:'mb',status:'Keypress signal via USB…',msg:'🔌 You pressed a key! The keyboard sends a signal through the USB port — the mainboard carries it straight to the CPU.',color:'#854F0B'},
+    {part:'cpu',status:'Identifying the key…',msg:'🧠 CPU receives the signal and works out which key was pressed by looking it up in a character table.',color:'#534AB7'},
+    {part:'ram',status:'Updating the document…',msg:'⚡ The letter is added to the open document in RAM — it updates instantly, which is why typing feels immediate!',color:'#0F6E56'},
+    {part:'cpu',status:'Letter displayed! ⌨️',msg:'🧠 CPU tells the screen to show the new letter. The whole process — keypress to letter appearing — takes under 1 millisecond!',color:'#534AB7'},
+  ],
+  boot:[
+    {part:'mb',status:'Power on! Waking up…',msg:'🔌 You pressed power! Electricity flows into the mainboard first. The BIOS chip activates — it\'s the first chip to run.',color:'#854F0B'},
+    {part:'cpu',status:'Running power-on self test…',msg:'🧠 CPU boots up and runs a POST — checking that all parts (RAM, SSD, graphics) are present and working.',color:'#534AB7'},
+    {part:'ram',status:'Memory check passed ✅',msg:'⚡ CPU checks the RAM slots. Memory is clear and responding — ready to receive data from the SSD.',color:'#0F6E56'},
+    {part:'ssd',status:'Loading Windows from storage…',msg:'💾 BIOS tells the SSD to start loading Windows. The SSD sends the operating system files at high speed.',color:'#993C1D'},
+    {part:'mb',status:'Carrying Windows to RAM…',msg:'🔌 Windows files travel from SSD, along the mainboard data bus, directly into RAM — all four parts working together!',color:'#854F0B'},
+    {part:'ram',status:'Windows ready! 🖥️',msg:'⚡ Windows is fully loaded into RAM. The CPU can now run it at full speed. Your desktop appears!',color:'#0F6E56'},
+  ]
+};
+const DISCUSS_PROMPTS = {
+  game:'Can you explain why RAM is needed when opening a game, and what would happen if the computer had no RAM?',
+  photo:'Can you explain the difference between RAM and SSD — why does the photo go from RAM to SSD when we save it?',
+  type:'Can you explain why typing a single letter involves the mainboard, CPU and RAM — why does it need all three just to show one letter?',
+  boot:'Can you explain why the BIOS chip runs before the CPU when you press the power button — what is it actually checking?'
+};
+let togTimer=null, currentScenario=null;
+function runScenario(id,btn) {
+  if(togTimer) clearTimeout(togTimer);
+  currentScenario=id;
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const steps=SCENARIOS[id];
+  ['cpu','ram','ssd','mb'].forEach(p=>{const el=document.getElementById('tp-'+p);if(el)el.classList.remove('active');document.getElementById('ts-'+p).textContent='Waiting…';});
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('event-display').innerHTML='';
+  document.getElementById('tog-log').classList.remove('show');
+  let i=0;
+  function step() {
+    if(i>=steps.length){
+      setTimeout(()=>{
+        ['cpu','ram','ssd','mb'].forEach(p=>{const el=document.getElementById('tp-'+p);if(el)el.classList.remove('active');document.getElementById('ts-'+p).textContent='Done ✅';});
+        const log=document.getElementById('tog-log'), body=document.getElementById('tog-log-body'), btn=document.getElementById('log-discuss-btn');
+        if(body){
+          body.innerHTML='';
+          steps.forEach((s,idx)=>{
+            const row=document.createElement('div'); row.className='log-entry';
+            const dot=document.createElement('div'); dot.className='log-dot'; dot.style.background=s.color;
+            const txt=document.createElement('span'); txt.style.cssText='font-size:.8rem;line-height:1.5;color:var(--text)';
+            txt.innerHTML='<strong style="color:'+s.color+'">'+(idx+1)+'.</strong> '+s.msg;
+            row.appendChild(dot); row.appendChild(txt); body.appendChild(row);
+          });
+        }
+        if(btn) btn.onclick=()=>window.open('https://claude.ai','_blank');
+        if(log) log.classList.add('show');
+        document.getElementById('event-display').innerHTML='<div class="event-step" style="color:var(--text-2);font-size:.84rem">All done! 🎉 Review the steps below — then try another scenario.</div>';
+      },600);
+      return;
+    }
+    const s=steps[i];
+    ['cpu','ram','ssd','mb'].forEach(p=>{const el=document.getElementById('tp-'+p);if(el)el.classList.remove('active');});
+    const part=document.getElementById('tp-'+s.part), stat=document.getElementById('ts-'+s.part);
+    if(part) part.classList.add('active');
+    if(stat) stat.textContent=s.status;
+    document.getElementById('event-display').innerHTML='<div class="event-step">'+s.msg+'</div>';
+    document.getElementById('progress-fill').style.width=Math.round(((i+1)/steps.length)*100)+'%';
+    i++;
+    togTimer=setTimeout(step,1700);
+  }
+  step();
+}
+
+/* ═══════════ BUILD PC ═══════════ */
+let placed={};
+const PART_DATA = {
+  cpu:{name:'CPU',icon:'🧠',bg:'var(--cpu)',badgeBg:'var(--cpu)',svgMini:'<svg width="28" height="28" viewBox="0 0 56 56"><rect x="12" y="12" width="32" height="32" rx="4" fill="#534AB7"/><rect x="19" y="19" width="18" height="18" rx="1" fill="#AFA9EC"/><text x="28" y="32" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="#fff">CPU</text></svg>'},
+  ram:{name:'RAM',icon:'⚡',bg:'var(--ram)',badgeBg:'var(--ram)',svgMini:'<svg width="14" height="36" viewBox="0 0 28 72"><rect x="2" y="4" width="24" height="64" rx="2" fill="#0F6E56"/><rect x="5" y="6" width="18" height="60" rx="1" fill="#1D9E75"/></svg>'},
+  ssd:{name:'SSD',icon:'💾',bg:'var(--ssd)',badgeBg:'var(--ssd)',svgMini:'<svg width="36" height="18" viewBox="0 0 72 36"><rect x="1" y="1" width="70" height="34" rx="3" fill="#993C1D"/><rect x="3" y="3" width="66" height="30" rx="2" fill="#D85A30"/><text x="36" y="23" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#FAECE7">SSD</text></svg>'}
+};
+function dStart(e,part){e.dataTransfer.setData('part',part);document.getElementById('drag-'+part).classList.add('dragging');}
+function dOver(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function dLeave(e){e.currentTarget.classList.remove('over');}
+function dDrop(e,slotPart){
+  e.preventDefault();e.currentTarget.classList.remove('over');
+  const part=e.dataTransfer.getData('part');
+  if(part!==slotPart){const s=document.getElementById('slot-'+slotPart);if(s){s.classList.add('wrong-drop');setTimeout(()=>s.classList.remove('wrong-drop'),400);}return;}
+  if(placed[part])return;
+  mountPart(part);
+}
+document.addEventListener('dragend',()=>document.querySelectorAll('.part-chip').forEach(d=>d.classList.remove('dragging')));
+let touchPart=null;
+function setupTouch(){
+  document.querySelectorAll('.part-chip').forEach(el=>{
+    el.addEventListener('touchstart',e=>{touchPart=el.id.replace('drag-','');el.classList.add('dragging');},{passive:true});
+    el.addEventListener('touchend',e=>{
+      el.classList.remove('dragging');
+      const t=e.changedTouches[0], target=document.elementFromPoint(t.clientX,t.clientY), slot=target&&target.closest('.mobo-slot');
+      if(slot&&touchPart){
+        const sId=slot.id.replace('slot-','');
+        if(touchPart===sId&&!placed[touchPart]) mountPart(touchPart);
+        else if(touchPart!==sId){slot.classList.add('wrong-drop');setTimeout(()=>slot.classList.remove('wrong-drop'),400);}
+      }
+      touchPart=null;
+    });
+  });
+}
+setTimeout(setupTouch,400);
+function mountPart(part){
+  placed[part]=true;
+  const info=PART_DATA[part], slot=document.getElementById('slot-'+part), drag=document.getElementById('drag-'+part);
+  if(slot){
+    slot.classList.add('filled');slot.style.background=info.bg;slot.style.borderColor='rgba(255,255,255,.3)';
+    slot.innerHTML='<div class="mounted-part">'+info.svgMini+'<span style="font-size:.65rem;font-weight:800;color:#fff;margin-top:2px">'+info.name+'</span></div><span class="mounted-check">✅</span>';
+    document.querySelectorAll('.trace').forEach((t,i)=>{setTimeout(()=>{t.classList.add('lit');setTimeout(()=>t.classList.remove('lit'),300);},i*40);});
+  }
+  if(drag) drag.classList.add('placed');
+  const bb=document.getElementById('bb-'+part);
+  if(bb){bb.classList.remove('empty');bb.classList.add('done');bb.style.background=info.badgeBg;bb.textContent=info.icon+' '+info.name+' ✓';}
+  if(Object.keys(placed).length===3) document.getElementById('power-btn').classList.add('ready');
+}
+function powerOn(){
+  if(Object.keys(placed).length<3) return;
+  const screen=document.getElementById('boot-screen');
+  if(!screen) return;
+  screen.innerHTML=''; screen.classList.add('show');
+  document.querySelectorAll('.trace').forEach((t,i)=>{setTimeout(()=>{t.classList.add('lit');setTimeout(()=>t.classList.remove('lit'),300);},i*30);});
+  const lines=['[ OK ] Mainboard: power-on self test passed ✓','[ OK ] CPU: 4 cores detected @ 3.6 GHz ✓','[ OK ] RAM: 8 GB installed and clear ✓','[ OK ] SSD: 512 GB detected ✓','[ OK ] Loading operating system from SSD...','[ OK ] Windows loaded into RAM successfully','[ OK ] All parts working together ✓','================================================','  🖥️  Welcome! Your computer is ready!','================================================'];
+  lines.forEach((l,i)=>{setTimeout(()=>{const d=document.createElement('div');d.className='boot-line';d.style.animationDelay=(i*.04)+'s';d.textContent=l;screen.appendChild(d);screen.scrollTop=999;},i*320);});
+}
+function resetBuild(){
+  placed={};
+  ['cpu','ram','ssd'].forEach(p=>{
+    const slot=document.getElementById('slot-'+p);
+    if(slot){slot.classList.remove('filled','wrong-drop');slot.style.background='';slot.style.borderColor='';
+      const hints={cpu:'CPU<br>socket',ram:'RAM slot',ssd:'SSD slot (M.2)'};
+      const isV=p==='ram';
+      slot.innerHTML='<span class="slot-hint" id="slot-'+p+'-hint"'+(isV?' style="writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)"':'')+'>'+hints[p]+'</span>';
+    }
+    const drag=document.getElementById('drag-'+p); if(drag) drag.classList.remove('placed');
+    const bb=document.getElementById('bb-'+p); if(bb){bb.classList.add('empty');bb.classList.remove('done');bb.style.background='';bb.textContent=({'cpu':'🧠 CPU','ram':'⚡ RAM','ssd':'💾 SSD'})[p];}
+  });
+  const btn=document.getElementById('power-btn'); if(btn) btn.classList.remove('ready');
+  const scr=document.getElementById('boot-screen'); if(scr){scr.classList.remove('show');scr.innerHTML='';}
+}
+
+/* ═══════════ QUIZ ═══════════ */
+const QS=[
+  {q:"What does CPU stand for?",opts:["Computer Power Unit","Central Processing Unit","Core Program Utility","Control Processing Upgrade"],a:1,fb:"CPU = Central Processing Unit — the brain that carries out every instruction in a program."},
+  {q:"Your game crashes mid-battle and the computer restarts. Which part loses all its data?",opts:["SSD","CPU","RAM","Mainboard"],a:2,fb:"RAM forgets everything the moment power is cut — that's why games ask you to save to the SSD!"},
+  {q:"You download a new game. Where is it stored permanently?",opts:["CPU","RAM","Mainboard","SSD"],a:3,fb:"The SSD stores things permanently — the game will still be there after you shut down and restart."},
+  {q:"The mainboard is described as 'blood vessels in a body'. What do the vessels carry?",opts:["Electricity only","Data between all the parts","The operating system","Game instructions"],a:1,fb:"The mainboard's copper traces carry data between parts — just like blood vessels carry blood to every organ!"},
+  {q:"A computer has 8 GB of RAM and you open lots of apps. What happens when it's nearly full?",opts:["The SSD fills up","Files get permanently deleted","The computer slows down — it runs out of working space","The CPU stops permanently"],a:2,fb:"When RAM fills up there's no working space — the computer slows badly. More RAM = more apps running smoothly at once!"},
+  {q:"An SSD is faster than an old HDD mainly because…",opts:["It uses more electricity","It has no moving parts","It is physically bigger","It connects to the CPU directly"],a:1,fb:"SSDs have zero spinning parts — that's why they're so much faster, quieter and harder to break than old spinning hard disks!"},
+  {q:"When you press the Power button, which chip wakes up FIRST?",opts:["RAM","CPU","BIOS chip on the mainboard","SSD"],a:2,fb:"The BIOS chip runs first — it checks all parts are connected and working, then starts loading Windows from the SSD."}
+];
+let qAns={};
+function buildQuiz(){
+  const wrap=document.getElementById('quiz-wrap'), sc=document.getElementById('score-banner');
+  qAns={}; if(sc) sc.classList.remove('show');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const pips=document.getElementById('q-pips'); if(pips){pips.innerHTML='';QS.forEach((_,i)=>{const d=document.createElement('div');d.className='q-pip';d.id='qpip'+i;pips.appendChild(d);});}
+  QS.forEach((q,qi)=>{
+    const c=document.createElement('div'); c.className='qcard';
+    c.innerHTML='<div class="qnum">Question '+(qi+1)+' of '+QS.length+'</div><div class="qtxt">'+q.q+'</div><div class="qopts">'+q.opts.map((o,oi)=>'<button class="qopt" id="qo'+qi+'_'+oi+'" onclick="ansQ('+qi+','+oi+')">'+o+'</button>').join('')+'</div><div class="qfb" id="qfb'+qi+'"></div>';
+    wrap.appendChild(c);
+  });
+}
+function ansQ(qi,chosen){
+  if(qAns[qi]!==undefined) return;
+  qAns[qi]=chosen; const q=QS[qi], right=chosen===q.a;
+  q.opts.forEach((_,oi)=>{const b=document.getElementById('qo'+qi+'_'+oi);if(!b)return;b.disabled=true;if(oi===q.a)b.classList.add('right');else if(oi===chosen&&!right)b.classList.add('wrong');});
+  const fb=document.getElementById('qfb'+qi); if(fb){fb.textContent=(right?'✅ Correct! ':'❌ Not quite. ')+q.fb;fb.className='qfb show '+(right?'good':'bad');}
+  const pip=document.getElementById('qpip'+qi); if(pip) pip.className='q-pip ans '+(right?'right':'wrong');
+  if(Object.keys(qAns).length===QS.length) setTimeout(showScore,700);
+}
+function showScore(){
+  const score=QS.filter((_,i)=>qAns[i]===QS[i].a).length, sc=document.getElementById('score-banner');
+  const stars=['','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'];
+  const msgs=['Keep studying — you can do it! Review each section 💪','Good effort! A few more reads and you\'ll nail it 📚','Nice work! Review the ones you missed 👍','Great job! You really know this 🌟','Brilliant — almost perfect! 💪','Perfect score! Computer expert! 🏆🏆','Perfect score! Computer expert! 🏆🏆'];
+  if(sc){
+    sc.innerHTML='<div class="score-stars">'+stars[Math.min(score,7)]+'</div><div class="score-num">'+score+'/'+QS.length+'</div><div class="score-of">questions correct</div><div class="score-msg">'+msgs[score]+'</div><button class="retry-btn" onclick="resetQuiz()">Try again 🔄</button>';
+    sc.classList.add('show');sc.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+function resetQuiz(){const sc=document.getElementById('score-banner');if(sc)sc.classList.remove('show');buildQuiz();document.getElementById('quiz-wrap').scrollIntoView({behavior:'smooth'});}
+</script>
+</body>
+</html>
