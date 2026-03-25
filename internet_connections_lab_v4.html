@@ -1,0 +1,752 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#185FA5;--blue-lt:#E6F1FB;--blue-dk:#0C447C;
+  --green:#3B6D11;--green-lt:#EAF3DE;--green-dk:#173404;
+  --amber:#854F0B;--amber-lt:#FAEEDA;--amber-dk:#412402;
+  --purple:#534AB7;--purple-lt:#EEEDFE;--purple-dk:#26215C;
+  --red:#A32D2D;--red-lt:#FCEBEB;--red-dk:#501313;
+  --teal:#0F6E56;--teal-lt:#E1F5EE;
+  /* self-contained fallbacks — work outside Claude.ai */
+  --color-text-primary:#111827;
+  --color-text-secondary:#6B7280;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#F9FAFB;
+  --color-border-primary:#9CA3AF;
+  --color-border-secondary:#E5E7EB;
+  --color-border-tertiary:#F3F4F6;
+  --border-radius-md:8px;
+  --border-radius-lg:12px;
+}
+body{font-size:14px;color:var(--color-text-primary);background:var(--color-background-primary);font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+h2{font-size:18px;font-weight:500;margin-bottom:4px}
+h3{font-size:15px;font-weight:500;margin-bottom:8px}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.nav-btn{padding:8px 16px;border-radius:20px;border:0.5px solid var(--color-border-secondary);font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--color-text-secondary);transition:all .2s;font-family:inherit}
+.nav-btn:hover{background:var(--color-background-secondary)}
+.nav-btn.on{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.activity{display:none}.activity.on{display:block}
+button{font-family:inherit;font-size:13px;font-weight:500;padding:8px 18px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;transition:all .15s}
+button:hover{background:var(--color-background-secondary)}
+button:active{transform:scale(0.98)}
+button.primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+button.primary:hover{opacity:.85}
+
+/* ── RACE ── */
+.conn-rows{display:grid;gap:10px;margin:1.2rem 0}
+.conn-row{display:grid;grid-template-columns:130px 1fr 90px;align-items:center;gap:10px}
+.conn-label{font-size:13px;font-weight:500}
+.conn-bar-wrap{height:22px;background:var(--color-background-secondary);border-radius:20px;overflow:hidden;position:relative;border:0.5px solid var(--color-border-tertiary)}
+.conn-bar{height:100%;border-radius:20px;transition:width 0.04s linear;position:relative}
+.conn-bar-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:500;color:#fff;white-space:nowrap;opacity:0;transition:opacity .3s}
+.conn-bar-label.show{opacity:1}
+.conn-val{font-size:13px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.winner-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:var(--green-lt);color:var(--green-dk);border:0.5px solid var(--green)}
+
+/* ── SIGNAL ── */
+.floor-plan{position:relative;width:100%;padding-bottom:52%;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);margin:.75rem 0;cursor:crosshair}
+.fp-room{position:absolute;border:1px solid var(--color-border-secondary);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.fp-router{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;cursor:grab;transform:translate(-50%,-50%);z-index:10;font-size:13px;color:#fff;font-weight:700;user-select:none}
+.fp-tower{position:absolute;width:22px;height:22px;border-radius:3px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transform:translate(-50%,-50%);z-index:10;user-select:none}
+.fp-phone{position:absolute;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:15px;transform:translate(-50%,-50%);cursor:move;z-index:11;user-select:none}
+.sig-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;border:0.5px solid var(--color-border-tertiary)}
+.signal-meter{display:flex;gap:3px;align-items:flex-end;height:20px}
+.sbar{width:5px;border-radius:2px 2px 0 0;background:var(--color-border-secondary)}
+.sbar.lit-wifi{background:var(--blue)}
+.sbar.lit-4g{background:var(--amber)}
+.sbar.lit-5g{background:var(--purple)}
+
+/* ── SORT ── */
+.sort-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:1rem 0}
+.drop-zone{min-height:110px;border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:8px;background:var(--color-background-secondary)}
+.drop-zone h4{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-secondary);margin-bottom:6px;text-align:center}
+.dz-wired{border-color:var(--blue)}
+.dz-wifi{border-color:var(--green)}
+.dz-4g{border-color:var(--amber)}
+.dz-5g{border-color:var(--purple)}
+.dz-fibre{border-color:var(--teal)}
+.sc-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 9px;font-size:11px;margin-bottom:5px;cursor:grab;user-select:none;line-height:1.4;transition:border-color .15s}
+.sc-card:hover{border-color:var(--color-border-primary)}
+.sc-card.dragging{opacity:.35}
+.sc-card.correct{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
+.sc-card.wrong{border-color:var(--red);background:var(--red-lt);color:var(--red-dk)}
+.unplaced{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin:1rem 0;min-height:50px;border:1.5px dashed var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:8px}
+.result-msg{font-size:13px;font-weight:500;padding:7px 12px;border-radius:var(--border-radius-md)}
+
+/* ── BUILD ── */
+.network-canvas{position:relative;width:100%;padding-bottom:48%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin:.75rem 0}
+.net-node{position:absolute;transform:translate(-50%,-50%);text-align:center;cursor:pointer;z-index:5}
+.net-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 3px;border:2px solid var(--color-border-secondary);background:var(--color-background-primary);transition:border-color .2s}
+.net-label{font-size:10px;font-weight:500;color:var(--color-text-secondary)}
+.palette-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem}
+.pal-item{padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:12px;font-weight:500;cursor:pointer;background:var(--color-background-secondary);transition:all .15s;font-family:inherit}
+.pal-item:hover{background:var(--color-background-primary)}
+.pal-item.sel{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk)}
+.pal-item.sel-conn-ethernet{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk)}
+.pal-item.sel-conn-wifi{background:var(--green-lt);border-color:var(--green);color:var(--green-dk)}
+.pal-item.sel-conn-4g{background:var(--amber-lt);border-color:var(--amber);color:var(--amber-dk)}
+.pal-item.sel-conn-5g{background:var(--purple-lt);border-color:var(--purple);color:var(--purple-dk)}
+.pal-item.sel-conn-fibre{background:var(--teal-lt);border-color:var(--teal);color:var(--teal)}
+.net-fb{font-size:13px;padding:9px 14px;border-radius:var(--border-radius-md);margin-top:.75rem;background:var(--color-background-secondary);color:var(--color-text-secondary);min-height:38px}
+.net-node.del-mode{cursor:not-allowed}
+.net-node.del-mode .net-icon{border-color:var(--red)!important;background:var(--red-lt)!important}
+.pal-item.sel-del{background:var(--red-lt);border-color:var(--red);color:var(--red-dk)}
+.link-hit{cursor:pointer}
+
+/* ── VOCAB ── */
+.vocab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:.75rem 0}
+.vocab-card{background:var(--color-background-primary);border:1.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;transition:all .2s;min-height:52px;display:flex;align-items:center;justify-content:center;line-height:1.4;user-select:none}
+.vocab-card:hover{border-color:var(--color-border-primary)}
+.vocab-card.selected{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk)}
+.vocab-card.matched{background:var(--green-lt);border-color:var(--green);color:var(--green-dk);cursor:default}
+.vocab-card.wrong-flash{background:var(--red-lt);border-color:var(--red);color:var(--red-dk)}
+.vocab-def{background:var(--color-background-secondary);border:1.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;cursor:pointer;transition:all .2s;line-height:1.5;user-select:none}
+.vocab-def:hover{border-color:var(--color-border-primary)}
+.vocab-def.selected{background:var(--amber-lt);border-color:var(--amber);color:var(--amber-dk)}
+.vocab-def.matched{background:var(--green-lt);border-color:var(--green);color:var(--green-dk);cursor:default}
+.vocab-def.wrong-flash{background:var(--red-lt);border-color:var(--red);color:var(--red-dk)}
+.vocab-score{font-size:22px;font-weight:600;color:var(--color-text-primary)}
+</style>
+
+<div style="padding:1rem 0 2rem">
+<div style="margin-bottom:1.2rem">
+  <h2>Internet connections lab</h2>
+  <p style="font-size:13px;color:var(--color-text-secondary)">Wired · Wi-Fi · 4G · 5G — 4 hands-on activities</p>
+</div>
+<div class="nav">
+  <button class="nav-btn on" onclick="go('speed')">1 — Speed race</button>
+  <button class="nav-btn" onclick="go('signal')">2 — Signal explorer</button>
+  <button class="nav-btn" onclick="go('sort')">3 — Scenario sort</button>
+  <button class="nav-btn" onclick="go('build')">4 — Build a network</button>
+  <button class="nav-btn" onclick="go('vocab')">5 — Key vocabulary</button>
+</div>
+
+<!-- ══ ACTIVITY 1: RACE ══ -->
+<div class="activity on" id="act-speed">
+  <h3>Send a 1 GB video file — which connection finishes first?</h3>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:.75rem">Hit Go and watch all five race. Use the sliders to simulate real-world conditions.</p>
+
+  <div class="conn-rows" id="race-rows">
+    <div class="conn-row">
+      <div class="conn-label" style="color:var(--teal)">Fibre optic</div>
+      <div class="conn-bar-wrap"><div class="conn-bar" id="bar-fibre" style="width:0%;background:#0F6E56"><span class="conn-bar-label" id="lbl-fibre"></span></div></div>
+      <div class="conn-val" id="val-fibre" style="color:var(--teal)">—</div>
+    </div>
+    <div class="conn-row">
+      <div class="conn-label" style="color:var(--blue-dk)">Ethernet</div>
+      <div class="conn-bar-wrap"><div class="conn-bar" id="bar-eth" style="width:0%;background:#185FA5"><span class="conn-bar-label" id="lbl-eth"></span></div></div>
+      <div class="conn-val" id="val-eth" style="color:var(--blue-dk)">—</div>
+    </div>
+    <div class="conn-row">
+      <div class="conn-label" style="color:var(--green)">Wi-Fi 6</div>
+      <div class="conn-bar-wrap"><div class="conn-bar" id="bar-wifi" style="width:0%;background:#3B6D11"><span class="conn-bar-label" id="lbl-wifi"></span></div></div>
+      <div class="conn-val" id="val-wifi" style="color:var(--green)">—</div>
+    </div>
+    <div class="conn-row">
+      <div class="conn-label" style="color:var(--amber)">4G cellular</div>
+      <div class="conn-bar-wrap"><div class="conn-bar" id="bar-4g" style="width:0%;background:#854F0B"><span class="conn-bar-label" id="lbl-4g"></span></div></div>
+      <div class="conn-val" id="val-4g" style="color:var(--amber)">—</div>
+    </div>
+    <div class="conn-row">
+      <div class="conn-label" style="color:var(--purple)">5G cellular</div>
+      <div class="conn-bar-wrap"><div class="conn-bar" id="bar-5g" style="width:0%;background:#534AB7"><span class="conn-bar-label" id="lbl-5g"></span></div></div>
+      <div class="conn-val" id="val-5g" style="color:var(--purple)">—</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem">
+    <button class="primary" id="race-btn" onclick="startRace()">Go — start the race</button>
+    <button onclick="resetRace()">Reset</button>
+    <span id="race-winner"></span>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 16px;margin-bottom:1.2rem">
+    <p style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">Adjust real-world conditions</p>
+    <div style="display:grid;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--color-text-secondary);min-width:110px">Wi-Fi interference</span>
+        <input type="range" min="1" max="8" value="1" id="wifi-penalty" step="1" style="flex:1" oninput="updateLabels()">
+        <span style="font-size:12px;font-weight:500;min-width:70px;text-align:right;color:var(--color-text-primary)" id="wifi-spd-lbl">600 Mbps</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--color-text-secondary);min-width:110px">4G signal strength</span>
+        <input type="range" min="1" max="5" value="4" id="4g-signal" step="1" style="flex:1" oninput="updateLabels()">
+        <span style="font-size:12px;font-weight:500;min-width:70px;text-align:right;color:var(--color-text-primary)" id="4g-spd-lbl">50 Mbps</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--color-text-secondary);min-width:110px">5G coverage</span>
+        <input type="range" min="1" max="5" value="4" id="5g-signal" step="1" style="flex:1" oninput="updateLabels()">
+        <span style="font-size:12px;font-weight:500;min-width:70px;text-align:right;color:var(--color-text-primary)" id="5g-spd-lbl">900 Mbps</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--teal-lt);border-left:3px solid var(--teal);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:10px 14px;font-size:13px;color:var(--teal);line-height:1.6;margin-bottom:.75rem">
+    <strong>Fibre optic vs Ethernet:</strong> Both use physical cables, but fibre sends data as pulses of light through glass strands rather than electrical signals through copper wire. This means far less interference, much lower latency, and speeds that can reach 10 Gbps or more — while standard Ethernet copper tops out around 1 Gbps for home connections.
+  </div>
+  <div style="background:var(--purple-lt);border-left:3px solid var(--purple);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:10px 14px;font-size:13px;color:var(--purple-dk);line-height:1.6">
+    <strong>5G vs 4G:</strong> 5G uses much higher radio frequencies (millimetre waves) which carry far more data — up to 20× faster than 4G. But those high frequencies don't travel as far or through walls as well, so 5G needs more towers close together. In cities you'll likely have 5G; in rural areas 4G is still common.
+  </div>
+</div>
+
+<!-- ══ ACTIVITY 2: SIGNAL ══ -->
+<div class="activity" id="act-signal">
+  <h3>Where does each signal reach?</h3>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:.5rem">Drag the phone around the building. Wi-Fi weakens with distance and walls. Both 4G and 5G come from the tower outside — but notice 5G drops faster as you move away.</p>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:.5rem;font-size:12px;align-items:center">
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:50%;background:var(--blue)"></div>Wi-Fi router (drag)</div>
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:var(--purple)"></div>5G/4G tower (fixed)</div>
+    <div style="display:flex;align-items:center;gap:5px;cursor:pointer;text-decoration:underline;color:var(--color-text-secondary)" onclick="spawnPhone()">+ add phone</div>
+  </div>
+
+  <div style="overflow:visible;margin-right:100px">
+  <div class="floor-plan" id="floor-plan">
+    <div class="fp-room" style="left:2%;top:2%;width:44%;height:44%">Living room</div>
+    <div class="fp-room" style="left:49%;top:2%;width:24%;height:44%">Kitchen</div>
+    <div class="fp-room" style="left:76%;top:2%;width:22%;height:44%">Bedroom 1</div>
+    <div class="fp-room" style="left:2%;top:50%;width:30%;height:46%">Bedroom 2</div>
+    <div class="fp-room" style="left:35%;top:50%;width:28%;height:46%">Bathroom</div>
+    <div class="fp-room" style="left:66%;top:50%;width:32%;height:46%">Garage</div>
+    <!-- outdoor strip on right -->
+    <div style="position:absolute;right:-90px;top:0;width:82px;height:100%;background:#e8f0e0;border-left:1px dashed #aaa;border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px">
+      <span style="font-size:9px;color:#555;font-weight:500;text-transform:uppercase;letter-spacing:.04em;writing-mode:horizontal-tb;white-space:nowrap">Outside</span>
+    </div>
+    <div class="fp-router" id="fp-router" style="left:27%;top:24%">R</div>
+    <div class="fp-tower" id="fp-tower" style="left:112%;top:30%" title="Cell tower (outside)">T</div>
+    <div style="position:absolute;left:108%;top:52%;font-size:9px;color:#534AB7;font-weight:500;white-space:nowrap">Cell tower</div>
+    <svg id="signal-rings" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
+  </div><!-- end floor-plan -->
+  </div><!-- end overflow wrapper -->
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:.75rem" id="phone-signals"></div>
+</div>
+
+<!-- ══ ACTIVITY 3: SORT ══ -->
+<div class="activity" id="act-sort">
+  <h3>Drag each scenario to the best connection</h3>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:.25rem">Think about where each scenario happens, what speed is needed, and whether it needs a physical cable.</p>
+
+  <div class="unplaced" id="unplaced-pool"></div>
+
+  <div class="sort-cols">
+    <div class="drop-zone dz-wired" id="dz-wired" ondragover="event.preventDefault()" ondrop="dropCard(event,'wired')">
+      <h4 style="color:var(--blue-dk)">Ethernet</h4>
+    </div>
+    <div class="drop-zone dz-fibre" id="dz-fibre" ondragover="event.preventDefault()" ondrop="dropCard(event,'fibre')">
+      <h4 style="color:var(--teal)">Fibre optic</h4>
+    </div>
+    <div class="drop-zone dz-wifi" id="dz-wifi" ondragover="event.preventDefault()" ondrop="dropCard(event,'wifi')">
+      <h4 style="color:var(--green)">Wi-Fi</h4>
+    </div>
+    <div class="drop-zone dz-4g" id="dz-4g" ondragover="event.preventDefault()" ondrop="dropCard(event,'4g')">
+      <h4 style="color:var(--amber)">4G cellular</h4>
+    </div>
+    <div class="drop-zone dz-5g" id="dz-5g" ondragover="event.preventDefault()" ondrop="dropCard(event,'5g')">
+      <h4 style="color:var(--purple)">5G cellular</h4>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:.75rem">
+    <button class="primary" onclick="checkSort()">Check my answers</button>
+    <button onclick="resetSort()">Start over</button>
+    <div class="result-msg" id="sort-msg"></div>
+  </div>
+</div>
+
+<!-- ══ ACTIVITY 4: BUILD ══ -->
+<div class="activity" id="act-build">
+  <h3>Build a network for each challenge</h3>
+  <div style="background:var(--amber-lt);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:.75rem;font-size:13px;color:var(--amber-dk);line-height:1.5" id="build-challenge"></div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:.4rem">
+    <span style="font-size:12px;color:var(--color-text-secondary);font-weight:500;min-width:90px">Add device:</span>
+    <div class="palette-wrap" id="device-palette">
+      <button class="pal-item" onclick="selectTool('pc',this)">Desktop PC</button>
+      <button class="pal-item" onclick="selectTool('laptop',this)">Laptop</button>
+      <button class="pal-item" onclick="selectTool('phone',this)">Phone</button>
+      <button class="pal-item" onclick="selectTool('router',this)">Router</button>
+      <button class="pal-item" onclick="selectTool('tower',this)">Cell tower</button>
+      <button class="pal-item" id="del-tool-btn" onclick="selectDelTool(this)" style="margin-left:8px">Delete device / link</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:.75rem">
+    <span style="font-size:12px;color:var(--color-text-secondary);font-weight:500;min-width:90px">Connect with:</span>
+    <div class="palette-wrap" id="conn-palette">
+      <button class="pal-item" id="cp-fibre" onclick="selectConn('fibre',this)">Fibre optic</button>
+      <button class="pal-item" id="cp-ethernet" onclick="selectConn('ethernet',this)">Ethernet cable</button>
+      <button class="pal-item" id="cp-wifi" onclick="selectConn('wifi',this)">Wi-Fi</button>
+      <button class="pal-item" id="cp-4g" onclick="selectConn('4g',this)">4G cellular</button>
+      <button class="pal-item" id="cp-5g" onclick="selectConn('5g',this)">5G cellular</button>
+      <button onclick="clearBuild()" style="margin-left:8px">Clear canvas</button>
+    </div>
+  </div>
+
+  <div class="network-canvas" id="net-canvas" onclick="canvasClick(event)">
+    <svg id="net-svg" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
+  </div>
+  <div class="net-fb" id="net-fb">Tip: place a Router first, then connect devices to it.</div>
+  <div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">
+    <button class="primary" onclick="checkBuild()">Check my network</button>
+    <button onclick="nextChallenge()">Next challenge →</button>
+  </div>
+</div>
+<!-- ══ ACTIVITY 5: VOCAB ══ -->
+<div class="activity" id="act-vocab">
+  <h3>Match each term to its definition</h3>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:.75rem">Click a term on the left, then click the matching definition on the right. All 8 pairs must be matched.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:.75rem 0" id="vocab-board"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:.75rem">
+    <button onclick="resetVocab()">Shuffle and restart</button>
+    <span id="vocab-score-msg" style="font-size:13px;color:var(--color-text-secondary)"></span>
+  </div>
+</div>
+</div><!-- end outer wrapper -->
+
+<script>
+function go(id){
+  document.querySelectorAll('.activity').forEach(a=>a.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('act-'+id).classList.add('on');
+  const idx={speed:0,signal:1,sort:2,build:3,vocab:4}[id];
+  document.querySelectorAll('.nav-btn')[idx].classList.add('on');
+  if(id==='signal'&&!sigInited)initSignal();
+  if(id==='sort'&&!sortInited)initSort();
+  if(id==='build'&&!buildInited)initBuild();
+  if(id==='vocab'&&!vocabInited)initVocab();
+}
+
+/* ══ RACE ══ */
+let rAF=null;
+function getSpeeds(){
+  const wp=parseInt(document.getElementById('wifi-penalty').value);
+  const gs=parseInt(document.getElementById('4g-signal').value);
+  const fs=parseInt(document.getElementById('5g-signal').value);
+  return{
+    fibre:10000,
+    eth:1000,
+    wifi:Math.round(600/wp),
+    '4g':Math.round([10,20,35,50,70][gs-1]),
+    '5g':Math.round([50,200,500,900,1500][fs-1])
+  };
+}
+function updateLabels(){
+  const s=getSpeeds();
+  document.getElementById('wifi-spd-lbl').textContent=s.wifi+' Mbps';
+  document.getElementById('4g-spd-lbl').textContent=s['4g']+' Mbps';
+  document.getElementById('5g-spd-lbl').textContent=s['5g']+' Mbps';
+}
+function startRace(){
+  cancelAnimationFrame(rAF);
+  const s=getSpeeds();
+  const maxS=Math.max(...Object.values(s));
+  const prog={fibre:0,eth:0,wifi:0,'4g':0,'5g':0};
+  const done={fibre:false,eth:false,wifi:false,'4g':false,'5g':false};
+  let winner=null;
+  const ids=['fibre','eth','wifi','4g','5g'];
+  document.getElementById('race-btn').disabled=true;
+  document.getElementById('race-winner').textContent='';
+  function tick(){
+    let allDone=true;
+    ids.forEach(id=>{
+      if(done[id])return;
+      allDone=false;
+      prog[id]=Math.min(100,prog[id]+(s[id]/maxS)*0.9);
+      document.getElementById('bar-'+id).style.width=prog[id]+'%';
+      const mb=Math.round(prog[id]/100*1024);
+      document.getElementById('val-'+id).textContent=mb+' MB';
+      const lbl=document.getElementById('lbl-'+id);
+      if(prog[id]>15){lbl.textContent=(s[id]>=1000?(s[id]/1000).toFixed(0)+' Gbps':s[id]+' Mbps');lbl.classList.add('show');}
+      if(prog[id]>=100){
+        done[id]=true;
+        if(!winner){
+          winner=id;
+          const names={fibre:'Fibre optic wins!',eth:'Ethernet wins!',wifi:'Wi-Fi wins!','4g':'4G wins!','5g':'5G wins!'};
+          const wr=document.getElementById('race-winner');
+          wr.innerHTML='<span class="winner-badge">'+names[id]+'</span>';
+        }
+      }
+    });
+    if(!allDone)rAF=requestAnimationFrame(tick);
+    else document.getElementById('race-btn').disabled=false;
+  }
+  rAF=requestAnimationFrame(tick);
+}
+function resetRace(){
+  cancelAnimationFrame(rAF);
+  ['fibre','eth','wifi','4g','5g'].forEach(id=>{
+    document.getElementById('bar-'+id).style.width='0%';
+    document.getElementById('val-'+id).textContent='—';
+    const lbl=document.getElementById('lbl-'+id);
+    if(lbl){lbl.textContent='';lbl.classList.remove('show');}
+  });
+  document.getElementById('race-winner').textContent='';
+  document.getElementById('race-btn').disabled=false;
+}
+
+/* ══ SIGNAL ══ */
+let phones=[],draggingPhone=null,draggingRouter=false,sigInited=false;
+function initSignal(){sigInited=true;spawnPhone();setupRouterDrag();renderSignals();}
+function spawnPhone(){
+  const fp=document.getElementById('floor-plan');
+  const ph=document.createElement('div');
+  ph.className='fp-phone';
+  const lx=[35,60,15,75];const ly=[70,35,55,65];
+  const i=phones.length;
+  ph.style.left=(lx[i%4]||45)+'%';ph.style.top=(ly[i%4]||50)+'%';
+  ph.innerHTML='<span style="font-size:15px">📱</span>';
+  fp.appendChild(ph);phones.push(ph);
+  setupPhoneDrag(ph);renderSignals();renderPhoneCards();
+}
+function setupPhoneDrag(ph){
+  ph.addEventListener('mousedown',e=>{draggingPhone=ph;e.preventDefault();});
+}
+function setupRouterDrag(){
+  document.getElementById('fp-router').addEventListener('mousedown',e=>{draggingRouter=true;e.preventDefault();});
+}
+document.addEventListener('mousemove',e=>{
+  if(!draggingPhone&&!draggingRouter)return;
+  const fp=document.getElementById('floor-plan');
+  const rect=fp.getBoundingClientRect();
+  const x=Math.max(2,Math.min(97,(e.clientX-rect.left)/rect.width*100));
+  const y=Math.max(2,Math.min(97,(e.clientY-rect.top)/rect.height*100));
+  if(draggingPhone){draggingPhone.style.left=x+'%';draggingPhone.style.top=y+'%';}
+  if(draggingRouter){document.getElementById('fp-router').style.left=x+'%';document.getElementById('fp-router').style.top=y+'%';}
+  renderSignals();renderPhoneCards();
+});
+document.addEventListener('mouseup',()=>{draggingPhone=null;draggingRouter=false;});
+function getPos(el){return{x:parseFloat(el.style.left),y:parseFloat(el.style.top)};}
+function dist(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function renderSignals(){
+  const svg=document.getElementById('signal-rings');
+  const r=getPos(document.getElementById('fp-router'));
+  let html='';
+  [[14,'#185FA5',.5],[26,'#378ADD',.3],[40,'#85B7EB',.2]].forEach(([rr,col,op])=>{
+    html+=`<ellipse cx="${r.x}%" cy="${r.y}%" rx="${rr}%" ry="${rr*.65}%" fill="none" stroke="${col}" stroke-width="1" opacity="${op}"/>`;
+  });
+  svg.innerHTML=html;
+}
+function wifiStr(d){return Math.max(0,Math.min(4,Math.round(4-d/13)));}
+function g4Str(d){return Math.max(1,Math.min(4,5-Math.floor(d/22)));}
+function g5Str(d){return Math.max(0,Math.min(4,5-Math.floor(d/16)));}
+function renderPhoneCards(){
+  const c=document.getElementById('phone-signals');c.innerHTML='';
+  const rp=getPos(document.getElementById('fp-router'));
+  const tp=getPos(document.getElementById('fp-tower'));
+  phones.forEach((ph,i)=>{
+    const pp=getPos(ph);
+    const ws=wifiStr(dist(pp,rp));
+    const td=dist(pp,tp);
+    const g4=g4Str(td),g5=g5Str(td);
+    const div=document.createElement('div');
+    div.className='sig-card';
+    div.innerHTML=`<div style="font-weight:500;margin-bottom:7px;font-size:13px">Phone ${i+1}</div>
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+      <span style="color:var(--blue-dk);font-size:12px;min-width:34px">Wi-Fi</span>
+      ${bars(ws,'wifi')}
+      <span style="font-size:12px;color:${ws>0?'var(--blue)':'var(--red)'}">${['No signal','Weak','OK','Good','Strong'][ws]}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+      <span style="color:var(--amber-dk);font-size:12px;min-width:34px">4G</span>
+      ${bars(g4,'4g')}
+      <span style="font-size:12px;color:var(--amber)">${['No signal','Weak','OK','Good','Strong'][g4]}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <span style="color:var(--purple-dk);font-size:12px;min-width:34px">5G</span>
+      ${bars(g5,'5g')}
+      <span style="font-size:12px;color:var(--purple)">${g5===0?'No signal (too far)':['','Weak','OK','Good','Strong'][g5]}</span>
+    </div>`;
+    c.appendChild(div);
+  });
+}
+function bars(s,type){
+  const cls='lit-'+type;const h=[7,10,14,18];
+  return`<div class="signal-meter">${[0,1,2,3].map(i=>`<div class="sbar${i<s?' '+cls:''}" style="height:${h[i]}px"></div>`).join('')}</div>`;
+}
+
+/* ══ SORT ══ */
+let sortInited=false;
+const scenarios=[
+  {id:'a',text:'Downloading a 50 GB game to your desktop PC at home',best:['wired'],ok:['fibre','wifi']},
+  {id:'b',text:'Streaming music on your phone walking to school',best:['4g','5g'],ok:[]},
+  {id:'c',text:'Video calling a friend on your laptop in the garden',best:['wifi'],ok:['5g']},
+  {id:'d',text:'A surgeon using a robot remotely — needs near-zero delay',best:['fibre'],ok:['5g']},
+  {id:'e',text:'Checking the bus timetable on your phone in town',best:['4g','5g'],ok:[]},
+  {id:'f',text:'Livestreaming a concert in 8K from a stadium',best:['5g'],ok:['fibre']},
+  {id:'g',text:'Using a laptop on the sofa to browse social media',best:['wifi'],ok:['5g']},
+  {id:'h',text:'A farmer\'s sensor sending data from a remote field',best:['4g'],ok:[]},
+  {id:'i',text:'A competitive gamer needing the lowest possible lag',best:['fibre'],ok:['wired']},
+  {id:'j',text:'Watching YouTube on a tablet in your bedroom',best:['wifi'],ok:['5g']},
+  {id:'k',text:'A data centre connecting two buildings on the same campus',best:['fibre'],ok:[]},
+  {id:'l',text:'Backing up 2 TB of photos from a desktop computer overnight',best:['fibre'],ok:['wired']},
+];
+function initSort(){sortInited=true;resetSort();}
+function resetSort(){
+  document.getElementById('sort-msg').innerHTML='';
+  ['wired','fibre','wifi','4g','5g'].forEach(z=>{const dz=document.getElementById('dz-'+z);const h=dz.querySelector('h4').outerHTML;dz.innerHTML=h;});
+  const pool=document.getElementById('unplaced-pool');pool.innerHTML='';
+  [...scenarios].sort(()=>Math.random()-.5).forEach(s=>{pool.appendChild(makeCard(s));});
+}
+function makeCard(s){
+  const c=document.createElement('div');c.className='sc-card';c.draggable=true;
+  c.dataset.id=s.id;c.dataset.best=s.best.join(',');c.dataset.ok=s.ok.join(',');
+  c.textContent=s.text;
+  c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text',s.id);c.classList.add('dragging');});
+  c.addEventListener('dragend',()=>c.classList.remove('dragging'));
+  return c;
+}
+function dropCard(e,zone){
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text');
+  const card=document.querySelector(`[data-id="${id}"]`);
+  if(card)document.getElementById('dz-'+zone).appendChild(card);
+}
+function checkSort(){
+  let correct=0,total=0;
+  ['wired','fibre','wifi','4g','5g'].forEach(zone=>{
+    document.getElementById('dz-'+zone).querySelectorAll('.sc-card').forEach(card=>{
+      total++;card.classList.remove('correct','wrong');
+      const best=card.dataset.best.split(',');const ok=card.dataset.ok.split(',');
+      if(best.includes(zone)||ok.includes(zone)){card.classList.add('correct');correct++;}
+      else card.classList.add('wrong');
+    });
+  });
+  const msg=document.getElementById('sort-msg');
+  if(!total){msg.textContent='Drag all cards first!';msg.style.background='';return;}
+  const pct=Math.round(correct/total*100);
+  if(pct===100){msg.textContent='Perfect — '+correct+'/'+total+'!';msg.style.background='var(--green-lt)';msg.style.color='var(--green-dk)';}
+  else if(pct>=60){msg.textContent=correct+'/'+total+' correct. Check the red cards.';msg.style.background='var(--amber-lt)';msg.style.color='var(--amber-dk)';}
+  else{msg.textContent=correct+'/'+total+' correct. Have another look.';msg.style.background='var(--red-lt)';msg.style.color='var(--red-dk)';}
+}
+
+/* ══ BUILD -- extended with delete/edit ══ */
+let buildInited=false,chalIdx=0,bNodes=[],bLinks=[],selTool=null,selConn=null,connFrom=null,delMode=false;
+const nodeEmoji={pc:'🖥',laptop:'💻',phone:'📱',router:'📡',tower:'🗼',internet:'☁️',destination:'🌐'};
+const connCol={fibre:'#0F6E56',ethernet:'#185FA5',wifi:'#3B6D11','4g':'#854F0B','5g':'#534AB7',internet:'#9CA3AF'};
+const connDash={fibre:'none',ethernet:'none',wifi:'8 5','4g':'4 4','5g':'2 3',internet:'6 4'};
+const challenges=[
+  {text:'Challenge 1: Home office. You want to video call a colleague on Zoom and download work files. Connect a Desktop PC and a Laptop to a Router — the PC with an Ethernet cable, the Laptop using Wi-Fi. Then connect the Router to the Internet, and the Internet to the Zoom servers.',destination:'Zoom servers',req:{nodes:['pc','laptop','router'],connTypes:['ethernet','wifi'],needsInternet:true}},
+  {text:'Challenge 2: City centre pop-up. You and a colleague both need to post live updates on social media from your Phones — no router available. Connect both Phones to a Cell Tower using 5G, then link the Cell Tower to the Internet and on to the Social Media servers.',destination:'Social media servers',req:{nodes:['phone','tower'],connTypes:['5g'],needsInternet:true}},
+  {text:'Challenge 3: Remote farmhouse. The internet only reaches by 4G. Connect a Laptop and a Phone via a Cell Tower using 4G, then link the Cell Tower to the Internet and on to the Web server.',destination:'Web server',req:{nodes:['laptop','phone','tower'],connTypes:['4g'],needsInternet:true}},
+  {text:'Challenge 4: Gaming setup. A PC needs an Ethernet cable for the lowest lag. A Phone nearby should use Wi-Fi. Connect both through a Router, then link the Router to the Internet and on to the Game servers.',destination:'Game servers',req:{nodes:['pc','phone','router'],connTypes:['ethernet','wifi'],needsInternet:true}},
+  {text:'Challenge 5: High-speed office. Connect two Desktop PCs to a Router using Fibre optic cables. Then connect the Router to the Internet and on to the Cloud storage servers.',destination:'Cloud storage',req:{nodes:['pc','router'],connTypes:['fibre'],needsInternet:true}},
+];
+function initBuild(){buildInited=true;chalIdx=0;loadChallenge();}
+function loadChallenge(){
+  bNodes=[];bLinks=[];connFrom=null;selTool=null;selConn=null;delMode=false;
+  document.getElementById('net-canvas').querySelectorAll('.net-node').forEach(n=>n.remove());
+  document.getElementById('net-svg').innerHTML='';
+  document.querySelectorAll('.pal-item').forEach(p=>p.classList.remove('sel','sel-conn-fibre','sel-conn-ethernet','sel-conn-wifi','sel-conn-4g','sel-conn-5g','sel-del'));
+  const ch=challenges[chalIdx%challenges.length];
+  document.getElementById('build-challenge').textContent=ch.text;
+  document.getElementById('net-fb').textContent='Tip: build your local network on the left, then connect through the Internet cloud to the destination on the right.';
+  document.getElementById('net-fb').style.background='';document.getElementById('net-fb').style.color='';
+  // pre-place fixed internet cloud and destination — not deletable, not placeable by user
+  const inetNode={id:'fixed-internet',type:'internet',x:78,y:35,fixed:true,label:'Internet'};
+  const destNode={id:'fixed-dest',type:'destination',x:92,y:35,fixed:true,label:ch.destination};
+  bNodes.push(inetNode,destNode);
+  renderBNode(inetNode);
+  renderBNode(destNode);
+}
+function clearPalette(){
+  document.querySelectorAll('.pal-item').forEach(p=>p.classList.remove('sel','sel-conn-fibre','sel-conn-ethernet','sel-conn-wifi','sel-conn-4g','sel-conn-5g','sel-del'));
+}
+function selectTool(t,el){
+  selTool=t;selConn=null;connFrom=null;delMode=false;
+  clearPalette();el.classList.add('sel');
+  document.getElementById('net-canvas').querySelectorAll('.net-node').forEach(n=>n.classList.remove('del-mode'));
+  document.getElementById('net-fb').textContent='Click anywhere on the canvas to place a '+t+'.';
+}
+function selectConn(t,el){
+  selConn=t;selTool=null;connFrom=null;delMode=false;
+  clearPalette();el.classList.add('sel-conn-'+t);
+  document.getElementById('net-canvas').querySelectorAll('.net-node').forEach(n=>n.classList.remove('del-mode'));
+  document.getElementById('net-fb').textContent='Click the first device, then the second to connect them. You can also click the Internet cloud to link your router or tower to it.';
+}
+function selectDelTool(el){
+  delMode=true;selTool=null;selConn=null;connFrom=null;
+  clearPalette();el.classList.add('sel-del');
+  document.getElementById('net-canvas').querySelectorAll('.net-node').forEach(n=>n.classList.add('del-mode'));
+  document.getElementById('net-fb').textContent='Delete mode: click a device to remove it (and its links), or click a link label on the canvas to remove that connection.';
+  drawLinksWithHitTargets();
+}
+function canvasClick(e){
+  if(e.target.closest('.net-node'))return;
+  if(!selTool)return;
+  const canvas=document.getElementById('net-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const x=Math.max(6,Math.min(92,(e.clientX-rect.left)/rect.width*100));
+  const y=Math.max(10,Math.min(88,(e.clientY-rect.top)/rect.height*100));
+  const node={id:'n'+Date.now(),type:selTool,x,y};
+  bNodes.push(node);renderBNode(node);
+  selTool=null;
+  clearPalette();
+  document.getElementById('net-fb').textContent='Device placed! Select a connection type and click two devices to link them.';
+}
+function renderBNode(node){
+  const canvas=document.getElementById('net-canvas');
+  const el=document.createElement('div');
+  el.className='net-node'+(delMode&&!node.fixed?' del-mode':'');
+  el.id=node.id;
+  el.style.left=node.x+'%';el.style.top=node.y+'%';
+  if(node.fixed){
+    const isInternet=node.type==='internet';
+    const bg=isInternet?'#DBEAFE':'#FEF3C7';
+    const border=isInternet?'#93C5FD':'#FCD34D';
+    const fontSize=isInternet?'22px':'16px';
+    el.innerHTML=`<div class="net-icon" style="border-style:dashed;border-color:${border};background:${bg};font-size:${fontSize};width:46px;height:46px">${nodeEmoji[node.type]}</div><div class="net-label" style="color:var(--color-text-secondary);max-width:64px;text-align:center;line-height:1.3">${node.label}</div>`;
+    el.style.cursor='default';
+  } else {
+    el.innerHTML=`<div class="net-icon">${nodeEmoji[node.type]||'?'}</div><div class="net-label">${node.type}</div>`;
+  }
+  el.onclick=ev=>{ev.stopPropagation();if(!node.fixed)nodeClick(node.id);else if(selConn)nodeClick(node.id);};
+  canvas.appendChild(el);
+}
+function nodeClick(id){
+  const node=bNodes.find(n=>n.id===id);
+  if(delMode){
+    if(node&&node.fixed){document.getElementById('net-fb').textContent='The Internet and destination are fixed — you cannot delete them.';return;}
+    bLinks=bLinks.filter(l=>l.a!==id&&l.b!==id);
+    bNodes=bNodes.filter(n=>n.id!==id);
+    const el=document.getElementById(id);if(el)el.remove();
+    drawLinksWithHitTargets();
+    document.getElementById('net-fb').textContent='Device removed. Keep deleting or switch tool.';
+    return;
+  }
+  if(!selConn){document.getElementById('net-fb').textContent='Select a connection type first (Fibre, Ethernet, Wi-Fi, 4G, or 5G).';return;}
+  if(!connFrom){
+    connFrom=id;
+    document.getElementById(id).querySelector('.net-icon').style.borderColor=connCol[selConn]||connCol.ethernet;
+    document.getElementById('net-fb').textContent='Good — now click the second device.';
+  } else {
+    if(connFrom===id){connFrom=null;document.querySelectorAll('.net-icon').forEach(i=>i.style.borderColor='var(--color-border-secondary)');return;}
+    // auto-use 'internet' connection type when linking to/from internet or destination nodes
+    const fromNode=bNodes.find(n=>n.id===connFrom);
+    const toNode=bNodes.find(n=>n.id===id);
+    const autoInternet=(fromNode&&fromNode.fixed)||(toNode&&toNode.fixed);
+    bLinks.push({a:connFrom,b:id,type:autoInternet?'internet':selConn});
+    document.querySelectorAll('.net-icon').forEach(i=>i.style.borderColor='var(--color-border-secondary)');
+    drawLinksWithHitTargets();connFrom=null;
+    document.getElementById('net-fb').textContent='Link added! Keep building or check your network.';
+  }
+}
+function drawLinks(){drawLinksWithHitTargets();}
+function drawLinksWithHitTargets(){
+  const svg=document.getElementById('net-svg');svg.innerHTML='';
+  bLinks.forEach((link,idx)=>{
+    const na=bNodes.find(n=>n.id===link.a),nb=bNodes.find(n=>n.id===link.b);
+    if(!na||!nb)return;
+    const col=connCol[link.type],dash=connDash[link.type];
+    const mx=(na.x+nb.x)/2,my=(na.y+nb.y)/2;
+    // invisible fat hit line for deletion
+    svg.innerHTML+=`<line x1="${na.x}%" y1="${na.y}%" x2="${nb.x}%" y2="${nb.y}%" stroke="transparent" stroke-width="14" stroke-linecap="round" style="cursor:${delMode?'pointer':'default'}" data-link-idx="${idx}" onclick="linkClick(${idx})"/>
+    <line x1="${na.x}%" y1="${na.y}%" x2="${nb.x}%" y2="${nb.y}%" stroke="${col}" stroke-width="2.5" stroke-dasharray="${dash}" stroke-linecap="round" pointer-events="none"/>
+    <text x="${mx}%" y="${my}%" text-anchor="middle" font-size="9" fill="${col}" dy="-4" font-family="inherit" font-weight="500" pointer-events="none">${link.type}</text>`;
+  });
+}
+function linkClick(idx){
+  if(!delMode)return;
+  bLinks.splice(idx,1);
+  drawLinksWithHitTargets();
+  document.getElementById('net-fb').textContent='Link removed.';
+}
+function clearBuild(){
+  bNodes=[];bLinks=[];connFrom=null;delMode=false;clearPalette();
+  document.getElementById('net-canvas').querySelectorAll('.net-node').forEach(n=>n.remove());
+  document.getElementById('net-svg').innerHTML='';
+  // re-place fixed nodes
+  const ch=challenges[chalIdx%challenges.length];
+  const inetNode={id:'fixed-internet',type:'internet',x:78,y:35,fixed:true,label:'Internet'};
+  const destNode={id:'fixed-dest',type:'destination',x:92,y:35,fixed:true,label:ch.destination};
+  bNodes.push(inetNode,destNode);
+  renderBNode(inetNode);renderBNode(destNode);
+  document.getElementById('net-fb').textContent='Canvas cleared. Build your local network, then connect it through the Internet to the destination.';
+}function checkBuild(){
+  const ch=challenges[chalIdx%challenges.length].req;
+  const types=bNodes.filter(n=>!n.fixed).map(n=>n.type);
+  const missing=ch.nodes.filter(n=>!types.includes(n));
+  if(missing.length){document.getElementById('net-fb').textContent='Missing devices: '+missing.join(', ')+'. Add those first.';return;}
+  const linkTypes=[...new Set(bLinks.filter(l=>l.type!=='internet').map(l=>l.type))];
+  const missingConn=ch.connTypes.filter(t=>!linkTypes.includes(t));
+  if(missingConn.length){document.getElementById('net-fb').textContent='You need to use: '+missingConn.join(' and ')+'. Check the challenge description.';return;}
+  // check internet chain: something connects to internet node, and internet connects to destination
+  const linkedToInternet=bLinks.some(l=>l.a==='fixed-internet'||l.b==='fixed-internet');
+  const linkedToDest=bLinks.some(l=>l.a==='fixed-dest'||l.b==='fixed-dest');
+  if(!linkedToInternet){document.getElementById('net-fb').textContent='Almost! Connect your Router or Cell Tower to the Internet cloud to complete the path.';return;}
+  if(!linkedToDest){document.getElementById('net-fb').textContent='Nearly there! Connect the Internet cloud to the destination server.';return;}
+  document.getElementById('net-fb').textContent='Full path complete! Data travels from your devices all the way to the destination. Well done.';
+  document.getElementById('net-fb').style.background='var(--green-lt)';document.getElementById('net-fb').style.color='var(--green-dk)';
+}
+function nextChallenge(){
+  chalIdx++;document.getElementById('net-fb').style.background='';document.getElementById('net-fb').style.color='';loadChallenge();
+}
+
+/* ══ VOCAB ══ */
+let vocabInited=false,vSelTerm=null,vSelDef=null,vMatched=0;
+const vocabPairs=[
+  {term:'Bandwidth',def:'The maximum amount of data that can travel through a connection per second, measured in Mbps or Gbps.'},
+  {term:'Latency',def:'The delay between sending a request and receiving a response — lower is better for gaming and video calls.'},
+  {term:'Ethernet',def:'A wired connection using a copper cable, offering reliable speeds up to 1 Gbps for home and office networks.'},
+  {term:'Fibre optic',def:'A wired connection that transmits data as pulses of light through glass strands, reaching speeds of 10 Gbps or more with very low latency.'},
+  {term:'Wi-Fi',def:'Wireless connection using radio waves from a router, allowing devices to connect without cables.'},
+  {term:'4G',def:'The fourth generation of mobile networks, providing fast mobile internet for smartphones across wide areas.'},
+  {term:'5G',def:'The fifth generation of mobile networks, using higher radio frequencies for much faster speeds but shorter range.'},
+  {term:'Router',def:'A device that receives internet from your ISP and shares it with devices on a local network via Wi-Fi or cable.'},
+  {term:'Cell tower',def:'A tall structure carrying antennas that broadcast and receive mobile network signals over a wide area.'},
+  {term:'Mbps',def:'Megabits per second — a unit for measuring internet speed. Higher numbers mean faster downloads.'},
+  {term:'Packet loss',def:'When some data packets fail to arrive at their destination, causing slowdowns or glitches in video and games.'},
+];
+function initVocab(){vocabInited=true;resetVocab();}
+function resetVocab(){
+  vSelTerm=null;vSelDef=null;vMatched=0;
+  // pick 6 random pairs each time
+  const pairs=[...vocabPairs].sort(()=>Math.random()-.5).slice(0,6);
+  const board=document.getElementById('vocab-board');board.innerHTML='';
+  document.getElementById('vocab-score-msg').textContent='';
+  const termCol=document.createElement('div');termCol.style.cssText='display:flex;flex-direction:column;gap:8px;';
+  const defCol=document.createElement('div');defCol.style.cssText='display:flex;flex-direction:column;gap:8px;';
+  const shuffledDefs=[...pairs].sort(()=>Math.random()-.5);
+  pairs.forEach(p=>{
+    const t=document.createElement('div');t.className='vocab-card';t.textContent=p.term;t.dataset.key=p.term;
+    t.onclick=()=>vocabTermClick(t);termCol.appendChild(t);
+  });
+  shuffledDefs.forEach(p=>{
+    const d=document.createElement('div');d.className='vocab-def';d.textContent=p.def;d.dataset.key=p.term;
+    d.onclick=()=>vocabDefClick(d);defCol.appendChild(d);
+  });
+  board.appendChild(termCol);board.appendChild(defCol);
+}
+function vocabTermClick(el){
+  if(el.classList.contains('matched'))return;
+  document.querySelectorAll('.vocab-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');vSelTerm=el;
+  tryVocabMatch();
+}
+function vocabDefClick(el){
+  if(el.classList.contains('matched'))return;
+  document.querySelectorAll('.vocab-def').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');vSelDef=el;
+  tryVocabMatch();
+}
+function tryVocabMatch(){
+  if(!vSelTerm||!vSelDef)return;
+  const t=vSelTerm,d=vSelDef;
+  vSelTerm=null;vSelDef=null;
+  if(t.dataset.key===d.dataset.key){
+    t.classList.remove('selected');d.classList.remove('selected');
+    t.classList.add('matched');d.classList.add('matched');
+    vMatched++;
+    const total=document.querySelectorAll('.vocab-card').length;
+    if(vMatched===total){
+      document.getElementById('vocab-score-msg').innerHTML='<strong>All matched!</strong> Great work.';
+    } else {
+      document.getElementById('vocab-score-msg').textContent=vMatched+' of '+total+' matched.';
+    }
+  } else {
+    t.classList.add('wrong-flash');d.classList.add('wrong-flash');
+    setTimeout(()=>{t.classList.remove('wrong-flash','selected');d.classList.remove('wrong-flash','selected');},700);
+  }
+}
+</script>
+
