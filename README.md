@@ -8,3 +8,5 @@
 [Wired and Wireless Network Exploration](internet_connections_lab_v4.html)
 
 [Digital Literacy Elements and Sub Elements Breakdown](DL_Elements_Sub_Elements.pdf)
+
+[Variable Story Lab](variable-story-lab.html)
