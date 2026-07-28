@@ -91,8 +91,6 @@
     font-size:13px; font-weight:500; margin-bottom:8px;
   }
   .dot{width:9px; height:9px; border-radius:3px; flex:none;}
-  .dot.hero{background:var(--hero);} .dot.place{background:var(--place);}
-  .dot.count{background:var(--count);} .dot.mood{background:var(--mood);}
 
   select{
     width:100%; font-family:var(--font-body); font-size:14.5px; color:var(--ink);
@@ -118,11 +116,57 @@
   .addrow button:focus-visible{outline:2px solid var(--hero); outline-offset:1px;}
 
   .slider-row{display:flex; align-items:center; gap:10px;}
-  input[type=range]{flex:1; accent-color:var(--count);}
+  input[type=range]{flex:1;}
   .slider-val{
     font-family:var(--font-mono); font-weight:500; font-size:14px; min-width:26px; text-align:right;
   }
   .hint{font-size:12px; color:var(--ink-faint); margin-top:6px;}
+
+  .add-var-panel{margin-top:14px; padding-top:14px; border-top:1px dashed var(--rule-strong);}
+  .avp-label{font-size:13px; color:var(--ink-soft); margin:0 0 8px;}
+  .avp-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .avp-row input{
+    flex:1; min-width:140px; font-family:var(--font-body); font-size:13.5px; color:var(--ink);
+    background:var(--bg); border:1px solid var(--rule-strong); border-radius:7px; padding:7px 8px;
+  }
+  .avp-row input::placeholder{color:var(--ink-faint);}
+  .avp-row input:focus-visible{outline:2px solid var(--hero); outline-offset:1px;}
+  .avp-row button{
+    font-family:var(--font-body); font-size:13px; font-weight:600; color:#fff;
+    background:var(--ink); border:none; border-radius:7px; padding:0 14px; cursor:pointer; flex:none;
+  }
+  .avp-row button:focus-visible{outline:2px solid var(--hero); outline-offset:2px;}
+  .add-var-error{color:#B3261E; font-size:12px; margin:8px 0 0;}
+
+  /* write-your-own editor */
+  .editor{
+    background:var(--paper); border:1px solid var(--rule); border-radius:var(--radius);
+    padding:14px 16px 16px; margin-bottom:1.75rem;
+  }
+  .editor-head{display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:.7rem;}
+  .editor-title{font-family:var(--font-display); font-weight:600; font-size:15px; margin:0;}
+  .ghost-btn{
+    font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--ink);
+    background:none; border:1px solid var(--rule-strong); border-radius:7px;
+    padding:6px 12px; cursor:pointer;
+  }
+  .ghost-btn:hover{border-color:var(--ink-soft);}
+  .ghost-btn:focus-visible{outline:2px solid var(--hero); outline-offset:2px;}
+  .insert-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .insert-token{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:700; color:#fff;
+    border:none; border-radius:7px; padding:7px 12px; cursor:pointer;
+  }
+  #story-editor{
+    width:100%; min-height:130px; font-family:var(--font-body); font-size:15px; line-height:1.6;
+    color:var(--ink); background:var(--bg); border:1px solid var(--rule-strong); border-radius:8px;
+    padding:12px 14px; resize:vertical;
+  }
+  #story-editor::placeholder{color:var(--ink-faint);}
+  #story-editor:focus-visible{outline:2px solid var(--hero); outline-offset:1px;}
+  .editor-hint{font-size:12.5px; color:var(--ink-faint); margin:8px 0 0;}
+
+  .story-card .placeholder{color:var(--ink-faint); font-style:italic;}
 
   /* story card */
   .story-card{
@@ -132,10 +176,6 @@
   .story-card .tag{
     font-weight:600; padding:1px 7px; border-radius:6px; white-space:nowrap;
   }
-  .tag.hero{background:var(--hero-bg); color:var(--hero-ink);}
-  .tag.place{background:var(--place-bg); color:var(--place-ink);}
-  .tag.count{background:var(--count-bg); color:var(--count-ink);}
-  .tag.mood{background:var(--mood-bg); color:var(--mood-ink);}
 
   /* code section */
   .code-head{display:flex; align-items:center; justify-content:space-between; margin:1.5rem 0 .7rem;}
@@ -157,19 +197,11 @@
     padding:14px 18px; font-family:var(--font-mono); font-size:13.5px; line-height:1.9;
     overflow-x:auto;
   }
-  .code-strip .k{color:#8FB8FF; font-weight:600;}
+  .code-strip .k{font-weight:600;}
   .code-strip .v{font-weight:500;}
-  .code-strip .k.hero,  .code-strip .v.hero{color:var(--hero-code);}
-  .code-strip .k.place, .code-strip .v.place{color:var(--place-code);}
-  .code-strip .k.count, .code-strip .v.count{color:var(--count-code);}
-  .code-strip .k.mood,  .code-strip .v.mood{color:var(--mood-code);}
   .code-strip .op{color:#8A94A0;}
   .code-strip .fstr{color:#9ECE8C;}
   .code-strip .fvar{font-weight:600;}
-  .code-strip .fvar.hero{color:var(--hero-code);}
-  .code-strip .fvar.place{color:var(--place-code);}
-  .code-strip .fvar.count{color:var(--count-code);}
-  .code-strip .fvar.mood{color:var(--mood-code);}
   .code-strip .print-line{margin-top:12px; padding-top:12px; border-top:1px dashed #3A404A; line-height:1.7;}
 
   /* block code (Scratch-style view) */
@@ -187,8 +219,6 @@
     content:''; position:absolute; top:-5px; left:16px; width:20px; height:6px;
     background:inherit; border-radius:4px 4px 0 0;
   }
-  .block.hero{background:var(--hero);} .block.place{background:var(--place);}
-  .block.count{background:var(--count);} .block.mood{background:var(--mood);}
   .block .lbl{opacity:.75; font-weight:500;}
   .block .pill{
     background:rgba(255,255,255,.22); border-radius:5px; padding:2px 8px; font-weight:600;
@@ -202,8 +232,6 @@
   .print-pill{
     padding:1px 6px; border-radius:4px; font-weight:700; color:#fff; font-size:12.5px;
   }
-  .print-pill.hero{background:var(--hero);} .print-pill.place{background:var(--place);}
-  .print-pill.count{background:var(--count);} .print-pill.mood{background:var(--mood);}
 
   footer{margin-top:2.5rem; font-size:13px; color:var(--ink-faint);}
 
@@ -218,7 +246,7 @@
   <header>
     <p class="eyebrow">A tool for teaching variables</p>
     <h1>Variable story lab</h1>
-    <p>Pick a story below. The four colored variables feed into it — change one value and every place it appears in the story updates at once. Run out of options? Add your own.</p>
+    <p>Pick a story below, or write your own. The colored variables feed into it — change a value and every place it appears updates at once. Run out of options, or want a whole new variable? Add your own below.</p>
   </header>
 
   <nav class="tabs" id="tabs" aria-label="Choose a story"></nav>
@@ -229,6 +257,26 @@
   </div>
 
   <div class="variables" id="variables"></div>
+
+  <div class="editor" id="editor" style="display:none;">
+    <div class="editor-head">
+      <p class="editor-title">Write your own story</p>
+      <button class="ghost-btn" id="load-example" type="button">Load an example</button>
+    </div>
+    <div class="insert-row" id="insert-row"></div>
+    <textarea id="story-editor" placeholder="Write your story here. Click a button above — or type your own { variable } names — anywhere you want that value to appear."></textarea>
+    <p class="editor-hint">Use any variable name from the panel above inside curly brackets, e.g. {hero} or {villain}. Anything else you type stays as plain text.</p>
+
+    <div class="add-var-panel">
+      <p class="avp-label">Need a new variable? Add one here — it’ll show up in the panel above and as a button here too.</p>
+      <div class="avp-row">
+        <input type="text" id="new-var-name" placeholder="name (letters only)" aria-label="New variable name">
+        <input type="text" id="new-var-value" placeholder="first value" aria-label="New variable first value">
+        <button type="button" id="add-var-btn">Add variable</button>
+      </div>
+      <p class="add-var-error" id="add-var-error" style="display:none;"></p>
+    </div>
+  </div>
 
   <section class="story-card" id="story" aria-live="polite"></section>
 
@@ -245,13 +293,30 @@
 </div>
 
 <script>
+  var PALETTE = [
+    { solid:'#4C5FD5', bg:'#E1E4FA', ink:'#31359C', code:'#93A2FF' }, // hero
+    { solid:'#0E8C72', bg:'#DCF3EC', ink:'#0C5E4B', code:'#5FE0BE' }, // place
+    { solid:'#C98B15', bg:'#FBEED0', ink:'#8A5A0A', code:'#FFCB6B' }, // count
+    { solid:'#C23B74', bg:'#F6DCE7', ink:'#8E2856', code:'#FF9BC6' }, // mood
+    { solid:'#2A7FA8', bg:'#DBEEF5', ink:'#155A78', code:'#7FD0F0' },
+    { solid:'#B85C2E', bg:'#FBE3D3', ink:'#7E3E15', code:'#FFAE7A' },
+    { solid:'#7B4FC9', bg:'#E8E0FA', ink:'#4B2E8A', code:'#B79CFF' },
+    { solid:'#5C7A29', bg:'#E4EDD2', ink:'#3B4F1A', code:'#A8C86B' }
+  ];
+  var nextPaletteIndex = 4; // 0-3 already used by the built-in variables below
+  function nextSwatch(){
+    var sw = PALETTE[nextPaletteIndex % PALETTE.length];
+    nextPaletteIndex++;
+    return sw;
+  }
+
   var variables = {
-    hero:  { color:'hero',  label:'hero',  kind:'select',
+    hero:  { label:'hero',  kind:'select', swatch: PALETTE[0],
       options:['Captain Nova','Dr. Pickle','Zapzilla','Mochi the Great','Ms. Thunderbolt'] },
-    place: { color:'place', label:'place', kind:'select',
+    place: { label:'place', kind:'select', swatch: PALETTE[1],
       options:['the school cafeteria','a volcano','the moon','Grandma\u2019s garage','a haunted library'] },
-    count: { color:'count', label:'count', kind:'slider', min:1, max:99, value:7 },
-    mood:  { color:'mood',  label:'mood',  kind:'select',
+    count: { label:'count', kind:'slider', swatch: PALETTE[2], min:1, max:99, value:7 },
+    mood:  { label:'mood',  kind:'select', swatch: PALETTE[3],
       options:['nervous','ridiculously confident','sleepy','furious','curious','embarrassed'] }
   };
 
@@ -265,6 +330,9 @@
     { id:'mystery', title:'Mystery at the library',
       template:'Something strange was happening at {place}. {hero}, feeling extremely {mood}, discovered {count} mysterious footprints leading straight to {place}. After following all {count} of them, {hero} solved the mystery \u2014 and never felt more {mood} in one single day.' }
   ];
+
+  var customStory = { id:'custom', title:'+ Write your own', template:'', isCustom:true };
+  stories.push(customStory);
 
   var currentValues = { hero:0, place:0, mood:0 };
   var activeStoryIndex = 0;
@@ -295,6 +363,7 @@
       btn.addEventListener('click', function(){
         activeStoryIndex = i;
         buildTabs();
+        syncEditor();
         renderStory();
       });
       tabsEl.appendChild(btn);
@@ -309,7 +378,7 @@
       var v = variables[key];
       var card = el('div', { class:'varcard' });
       var labelRow = el('div', { class:'varlabel' }, [
-        el('span', { class:'dot ' + v.color }),
+        el('span', { class:'dot', style:'background:' + v.swatch.solid }),
         document.createTextNode(v.label)
       ]);
       card.appendChild(labelRow);
@@ -353,7 +422,7 @@
         var row = el('div', { class:'slider-row' });
         var slider = el('input', {
           type:'range', min:v.min, max:v.max, step:'1', value:v.value, id:'sel-' + key,
-          'aria-label': v.label
+          style:'accent-color:' + v.swatch.solid, 'aria-label': v.label
         });
         var out = el('span', { class:'slider-val', text:String(v.value) });
         slider.addEventListener('input', function(){
@@ -371,6 +440,41 @@
     });
   }
 
+  document.getElementById('add-var-btn').addEventListener('click', addVariable);
+  document.getElementById('new-var-name').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('new-var-value').focus(); }
+  });
+  document.getElementById('new-var-value').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); addVariable(); }
+  });
+
+  function addVariable(){
+    var nameInput = document.getElementById('new-var-name');
+    var valueInput = document.getElementById('new-var-value');
+    var errorEl = document.getElementById('add-var-error');
+    var name = (nameInput.value || '').toLowerCase().replace(/[^a-z]/g, '');
+    var value = valueInput.value.trim();
+
+    function showError(msg){
+      errorEl.textContent = msg;
+      errorEl.style.display = '';
+    }
+
+    if (!name) { showError('Give it a name using letters only, e.g. villain.'); return; }
+    if (variables[name]) { showError('\u201c' + name + '\u201d is already a variable \u2014 try another name.'); return; }
+    if (!value) { showError('Give it a first value too.'); return; }
+
+    variables[name] = { label:name, kind:'select', swatch: nextSwatch(), options:[value] };
+    currentValues[name] = 0;
+    nameInput.value = '';
+    valueInput.value = '';
+    errorEl.style.display = 'none';
+
+    buildVariables();
+    buildInsertRow();
+    renderStory();
+  }
+
   function currentValueText(key){
     var v = variables[key];
     if (v.kind === 'slider') return String(v.value);
@@ -380,15 +484,21 @@
   function renderStory(){
     var story = stories[activeStoryIndex];
     var storyEl = document.getElementById('story');
-    var parts = story.template.split(/(\{hero\}|\{place\}|\{count\}|\{mood\}|\s+)/);
     storyEl.innerHTML = '';
-    var frag = document.createDocumentFragment();
 
+    if (story.isCustom && !story.template.trim()) {
+      storyEl.appendChild(el('span', { class:'placeholder', text:'Your story will appear here as you write it below.' }));
+      renderCode();
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
     story.template.split(/(\{[a-z]+\})/).forEach(function(chunk){
       var match = chunk.match(/^\{([a-z]+)\}$/);
       if (match && variables[match[1]]) {
         var key = match[1];
-        var span = el('span', { class:'tag ' + variables[key].color, text: currentValueText(key) });
+        var sw = variables[key].swatch;
+        var span = el('span', { class:'tag', style:'background:' + sw.bg + ';color:' + sw.ink, text: currentValueText(key) });
         frag.appendChild(span);
       } else if (chunk) {
         frag.appendChild(document.createTextNode(chunk));
@@ -409,7 +519,7 @@
       Object.keys(variables).forEach(function(key){
         var v = variables[key];
         var val = currentValueText(key);
-        var block = el('div', { class:'block ' + v.color });
+        var block = el('div', { class:'block', style:'background:' + v.swatch.solid });
         block.appendChild(el('span', { class:'lbl', text:'set' }));
         block.appendChild(el('span', { class:'pill', text:key }));
         block.appendChild(el('span', { class:'lbl', text:'to' }));
@@ -420,15 +530,19 @@
       var printBlock = el('div', { class:'block print' });
       printBlock.appendChild(el('span', { class:'lbl', text:'print' }));
       var story = stories[activeStoryIndex];
-      story.template.split(/(\{[a-z]+\})/).forEach(function(chunk){
-        var match = chunk.match(/^\{([a-z]+)\}$/);
-        if (match && variables[match[1]]) {
-          var key = match[1];
-          printBlock.appendChild(el('span', { class:'print-pill ' + variables[key].color, text:key }));
-        } else if (chunk) {
-          printBlock.appendChild(document.createTextNode(chunk));
-        }
-      });
+      if (story.template.trim()) {
+        story.template.split(/(\{[a-z]+\})/).forEach(function(chunk){
+          var match = chunk.match(/^\{([a-z]+)\}$/);
+          if (match && variables[match[1]]) {
+            var key = match[1];
+            printBlock.appendChild(el('span', { class:'print-pill', style:'background:' + variables[key].swatch.solid, text:key }));
+          } else if (chunk) {
+            printBlock.appendChild(document.createTextNode(chunk));
+          }
+        });
+      } else {
+        printBlock.appendChild(el('span', { class:'lbl', text:'\u2026write a story above first' }));
+      }
       stack.appendChild(printBlock);
 
       area.appendChild(stack);
@@ -438,43 +552,97 @@
         var line = document.createElement('div');
         var val = currentValueText(key);
         var display = variables[key].kind === 'slider' ? val : '"' + val + '"';
-        line.innerHTML = '<span class="k ' + variables[key].color + '">' + key + '</span> <span class="op">=</span> <span class="v ' + variables[key].color + '">' + display + '</span>';
+        var codeColor = variables[key].swatch.code;
+        line.innerHTML = '<span class="k" style="color:' + codeColor + '">' + key + '</span> <span class="op">=</span> <span class="v" style="color:' + codeColor + '">' + display + '</span>';
         codeEl.appendChild(line);
       });
 
       var printLine = document.createElement('div');
       printLine.className = 'print-line';
-      var htmlParts = ['<span class="op">print(f"</span>'];
-      stories[activeStoryIndex].template.split(/(\{[a-z]+\})/).forEach(function(chunk){
-        var match = chunk.match(/^\{([a-z]+)\}$/);
-        if (match && variables[match[1]]) {
-          var key = match[1];
-          htmlParts.push('<span class="fvar ' + variables[key].color + '">{' + key + '}</span>');
-        } else if (chunk) {
-          htmlParts.push('<span class="fstr">' + escapeHtml(chunk) + '</span>');
-        }
-      });
-      htmlParts.push('<span class="op">")</span>');
-      printLine.innerHTML = htmlParts.join('');
+      var activeTemplate = stories[activeStoryIndex].template;
+      if (activeTemplate.trim()) {
+        var htmlParts = ['<span class="op">print(f"</span>'];
+        activeTemplate.split(/(\{[a-z]+\})/).forEach(function(chunk){
+          var match = chunk.match(/^\{([a-z]+)\}$/);
+          if (match && variables[match[1]]) {
+            var key = match[1];
+            htmlParts.push('<span class="fvar" style="color:' + variables[key].swatch.code + '">{' + key + '}</span>');
+          } else if (chunk) {
+            htmlParts.push('<span class="fstr">' + escapeHtml(chunk) + '</span>');
+          }
+        });
+        htmlParts.push('<span class="op">")</span>');
+        printLine.innerHTML = htmlParts.join('');
+      } else {
+        printLine.innerHTML = '<span class="op">\u2026write a story above first</span>';
+      }
       codeEl.appendChild(printLine);
 
       area.appendChild(codeEl);
     }
   }
 
-  function shuffleAll(){
-    ['hero','place','mood'].forEach(function(key){
-      var v = variables[key];
-      currentValues[key] = Math.floor(Math.random() * v.options.length);
-      var sel = document.getElementById('sel-' + key);
-      if (sel) sel.value = currentValues[key];
+  function syncEditor(){
+    var editor = document.getElementById('editor');
+    var story = stories[activeStoryIndex];
+    if (story.isCustom) {
+      editor.style.display = '';
+      var ta = document.getElementById('story-editor');
+      if (ta.value !== story.template) ta.value = story.template;
+    } else {
+      editor.style.display = 'none';
+    }
+  }
+
+  function insertToken(key){
+    var ta = document.getElementById('story-editor');
+    var start = typeof ta.selectionStart === 'number' ? ta.selectionStart : ta.value.length;
+    var end = typeof ta.selectionEnd === 'number' ? ta.selectionEnd : ta.value.length;
+    var token = '{' + key + '}';
+    ta.value = ta.value.slice(0, start) + token + ta.value.slice(end);
+    customStory.template = ta.value;
+    ta.focus();
+    var pos = start + token.length;
+    ta.setSelectionRange(pos, pos);
+    renderStory();
+  }
+
+  function buildInsertRow(){
+    var row = document.getElementById('insert-row');
+    row.innerHTML = '';
+    Object.keys(variables).forEach(function(key){
+      var btn = el('button', { type:'button', class:'insert-token', style:'background:' + variables[key].swatch.solid, text:'{' + key + '}' });
+      btn.addEventListener('click', function(){ insertToken(key); });
+      row.appendChild(btn);
     });
-    var countVar = variables.count;
-    countVar.value = Math.floor(Math.random() * (countVar.max - countVar.min + 1)) + countVar.min;
-    var countSlider = document.getElementById('sel-count');
-    if (countSlider) countSlider.value = countVar.value;
-    var out = document.querySelector('.slider-val');
-    if (out) out.textContent = String(countVar.value);
+  }
+
+  document.getElementById('story-editor').addEventListener('input', function(){
+    customStory.template = this.value;
+    renderStory();
+  });
+
+  document.getElementById('load-example').addEventListener('click', function(){
+    customStory.template = 'One day, {hero} wandered into {place} feeling {mood}. After counting {count} strange footprints, {hero} decided it was time to leave {place} \u2014 still feeling {mood}, but {count} steps wiser.';
+    document.getElementById('story-editor').value = customStory.template;
+    renderStory();
+  });
+
+  function shuffleAll(){
+    Object.keys(variables).forEach(function(key){
+      var v = variables[key];
+      if (v.kind === 'select') {
+        currentValues[key] = Math.floor(Math.random() * v.options.length);
+        var sel = document.getElementById('sel-' + key);
+        if (sel) sel.value = currentValues[key];
+      } else if (v.kind === 'slider') {
+        v.value = Math.floor(Math.random() * (v.max - v.min + 1)) + v.min;
+        var slider = document.getElementById('sel-' + key);
+        if (slider) slider.value = v.value;
+        var out = slider ? slider.parentElement.querySelector('.slider-val') : null;
+        if (out) out.textContent = String(v.value);
+      }
+    });
     renderStory();
   }
 
@@ -495,6 +663,8 @@
 
   buildTabs();
   buildVariables();
+  buildInsertRow();
+  syncEditor();
   renderStory();
 </script>
 </body>
