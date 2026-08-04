@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case File: The Selection Suspect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f231f;
+    --bg-deep: #0a1a17;
+    --panel: #163530;
+    --panel-2: #1c3f39;
+    --line: #2b5951;
+    --lamp: #ffc857;
+    --lamp-dim: #8a6a2c;
+    --ink: #eef2ee;
+    --ink-dim: #a9c0ba;
+    --code-green: #7ee9ab;
+    --code-blue: #7cc4ff;
+    --code-pink: #ff9b9b;
+    --true-col: #6ee39a;
+    --false-col: #ff8686;
+    --radius: 10px;
+    --card-w: 150px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,200,87,0.10), transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    min-height:100vh;
+    padding: 28px 20px 60px;
+  }
+  .wrap{max-width: 1180px; margin: 0 auto;}
+
+  /* HEADER */
+  header{
+    display:flex; flex-direction:column; gap:6px; margin-bottom:22px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--lamp);
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4vw, 38px);
+    margin: 2px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{color: var(--ink-dim); font-size:14.5px; max-width:640px; line-height:1.5;}
+
+  details.howto{
+    margin-top:14px; background: var(--panel); border:1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 16px;
+  }
+  details.howto summary{
+    cursor:pointer; font-family:'Space Grotesk',sans-serif; font-weight:600;
+    font-size:14px; color:var(--lamp); list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.howto summary::-webkit-details-marker{display:none;}
+  details.howto summary::before{content:"▸"; transition: transform .15s;}
+  details.howto[open] summary::before{transform: rotate(90deg);}
+  .howto-body{padding-top:12px; font-size:13.5px; line-height:1.65; color: var(--ink-dim);}
+  .howto-body code{
+    font-family:'JetBrains Mono',monospace; background: var(--bg-deep); color: var(--code-green);
+    padding:1px 6px; border-radius:4px; font-size:12.5px;
+  }
+  .howto-grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:10px;}
+  .howto-card{background:var(--bg-deep); border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .howto-card b{color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:12.5px;}
+
+  /* STATUS BAR */
+  .status{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    margin: 18px 0 16px;
+  }
+  .status-left{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .pill{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px;
+    background: var(--panel); border:1px solid var(--line); padding: 6px 12px; border-radius: 999px;
+    color: var(--ink-dim);
+  }
+  .pill strong{color: var(--lamp); font-weight:600;}
+  button.newcase{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    background:transparent; border:1px solid var(--lamp-dim); color: var(--lamp);
+    padding:8px 14px; border-radius:8px; cursor:pointer; transition: all .15s;
+  }
+  button.newcase:hover{background: rgba(255,200,87,0.1); border-color: var(--lamp);}
+
+  .mode-toggle{ display:flex; background: var(--bg-deep); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; }
+  .mode-btn{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px;
+    padding:6px 12px; border-radius:6px; border:none; background:transparent;
+    color: var(--ink-dim); cursor:pointer; transition: all .15s;
+  }
+  .mode-btn:hover{ color: var(--ink); }
+  .mode-btn.active{ background: var(--lamp); color:#1c1204; }
+
+  /* BLOCK-CODE VISUAL STYLE */
+  .blk-group{ font-family:'Space Grotesk',sans-serif; }
+  .blk-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:3px 0; }
+  .blk{
+    position:relative; display:inline-flex; align-items:center; padding:5px 12px;
+    border-radius:6px; color:#fff; font-weight:700; font-size:11.5px; white-space:nowrap;
+  }
+  .blk::before{
+    content:''; position:absolute; top:-3px; left:9px; width:12px; height:3px;
+    background:inherit; border-radius:2px 2px 0 0;
+  }
+  .blk-if, .blk-else{ background:#d9852b; }
+  .blk-bool{ background:#3fae62; border-radius:14px; padding:5px 13px; }
+  .blk-bool::before{display:none;}
+  .blk-action{ background:#3b82c4; }
+  .blk-and{ background:#8a5fd6; border-radius:14px; padding:5px 13px; }
+  .blk-and::before{display:none;}
+  .blk-stack{ display:flex; flex-direction:column; gap:5px; margin:3px 0 3px 18px; }
+  .blk-stack.active .blk-action{ box-shadow: 0 0 0 2px var(--true-col); }
+  .blk-stack.inactive .blk-action{ background:#3a4750; color:#c7d3d6; text-decoration: line-through; }
+
+  /* LAYOUT */
+  .layout{display:grid; grid-template-columns: 1fr 380px; gap:20px; align-items:start;}
+  @media (max-width: 920px){ .layout{grid-template-columns: 1fr;} }
+  .board-col{ display:flex; flex-direction:column; gap:14px; }
+
+  /* REVEAL BANNER */
+  .reveal-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:14px 18px; border-radius:10px; background: var(--panel); border:1px solid var(--line);
+    opacity:0; transform: translateY(-10px) scale(0.98); pointer-events:none;
+    transition: opacity .22s ease, transform .22s ease, border-color .22s ease, max-height .3s ease, padding .25s ease, border-width .25s ease;
+    max-height:0; overflow:hidden; padding-top:0; padding-bottom:0; border-width:0;
+  }
+  .reveal-banner.show{
+    opacity:1; transform: translateY(0) scale(1); max-height:140px;
+    padding:14px 18px; border-width:1px;
+  }
+  .reveal-banner.true{ border-color: var(--true-col); }
+  .reveal-banner.false{ border-color: var(--false-col); }
+  .reveal-banner .rb-eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color: var(--ink-dim); margin-bottom:4px;
+  }
+  .reveal-banner .rb-code{ font-family:'JetBrains Mono',monospace; font-size:13.5px; color: var(--ink); }
+  .reveal-banner .rb-code .kw{color: var(--code-pink);}
+  .reveal-banner .rb-code .fn{color: var(--code-blue);}
+  .reveal-banner .rb-action{ font-size:12.5px; color: var(--ink-dim); margin-top:3px; }
+  .reveal-banner .rb-answer{
+    flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px;
+    letter-spacing:.02em; padding:6px 18px; border-radius:9px;
+  }
+  .reveal-banner.true .rb-answer{ color:#0d2b1c; background: var(--true-col); }
+  .reveal-banner.false .rb-answer{ color:#3a0d0d; background: var(--false-col); }
+
+  /* BOARD */
+  .board{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+    gap:12px;
+  }
+  .suspect{
+    position:relative; background: var(--panel); border:1px solid var(--line);
+    border-radius: var(--radius); padding:10px 8px 12px; text-align:center;
+    transition: opacity .35s ease, filter .35s ease, transform .2s ease;
+    cursor:pointer;
+  }
+  .suspect:hover{ transform: translateY(-2px); border-color: var(--lamp-dim); }
+  .suspect .avatar-wrap{
+    width:100%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; background: var(--bg-deep);
+    margin-bottom:8px; border:1px solid var(--line); perspective: 700px;
+  }
+  .card-flip{
+    position:relative; width:100%; height:100%; transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.45,.15,.2,1);
+  }
+  .card-flip.flip-down{ transform: rotateY(180deg); }
+  .card-flip.flip-pulse{ animation: flipPulse .68s cubic-bezier(.45,.15,.2,1); }
+  @keyframes flipPulse{
+    0%{ transform: rotateY(0deg); }
+    55%{ transform: rotateY(180deg); }
+    100%{ transform: rotateY(360deg); }
+  }
+  .card-face{
+    position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card-face.card-front svg{ width:100%; height:100%; display:block; }
+  .card-face.card-back{
+    transform: rotateY(180deg); flex-direction:column; gap:3px; text-align:center; padding:6px;
+  }
+  .card-back.verdict-true{ background: rgba(110,227,154,0.16); }
+  .card-back.verdict-false{ background: #5c1a1d; }
+  .card-back .verdict-icon{ font-size:28px; line-height:1; }
+  .card-back .verdict-label{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11px; letter-spacing:.05em; }
+  .card-back.verdict-true .verdict-icon, .card-back.verdict-true .verdict-label{ color: var(--true-col); }
+  .card-back.verdict-false .verdict-icon, .card-back.verdict-false .verdict-label{ color: #ffe3e3; }
+  .suspect svg{width:100%; height:100%; display:block;}
+  .suspect .name{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; color: var(--ink);
+    transition: opacity .3s;
+  }
+  .suspect .accuse-btn{
+    margin-top:8px; width:100%; font-family:'JetBrains Mono',monospace; font-size:11px;
+    background: var(--bg-deep); border:1px solid var(--lamp-dim); color: var(--lamp);
+    padding:5px 0; border-radius:6px; cursor:pointer; opacity:0; pointer-events:none;
+    transition: opacity .15s;
+  }
+  .suspect:hover .accuse-btn, .suspect.selected .accuse-btn{opacity:1; pointer-events:auto;}
+
+  .suspect.eliminated{ cursor:default; }
+  .suspect.eliminated:hover{ transform:none; border-color: var(--line); }
+  .suspect.eliminated .name{ opacity:0.42; }
+  .suspect.eliminated .accuse-btn{display:none;}
+
+  .panel.resolving .qbtn{ opacity:.35; pointer-events:none; }
+  .board.resolving .suspect{ pointer-events:none; }
+
+  .suspect.shake{ animation: shake .4s; }
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(3px);}
+    30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);}
+  }
+  .suspect.won{ outline: 2px solid var(--true-col); box-shadow: 0 0 0 5px rgba(110,227,154,0.15); }
+
+  /* RIGHT PANEL */
+  .panel{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+    padding:16px; position: sticky; top:16px; max-height: calc(100vh - 32px);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .panel h2{
+    font-family:'Space Grotesk',sans-serif; font-size:14px; margin:0; color:var(--lamp);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .qgroup-label{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color: var(--ink-dim);
+    text-transform:uppercase; letter-spacing:.08em; margin: 4px 0 -2px;
+  }
+  .questions{display:flex; flex-wrap:wrap; gap:6px;}
+  .qbtn{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    background: var(--bg-deep); border:1px solid var(--line); color: var(--ink);
+    padding:6px 10px; border-radius:7px; cursor:pointer; transition: all .15s;
+  }
+  .qbtn:hover:not(:disabled){ border-color: var(--lamp); color: var(--lamp); }
+  .qbtn:disabled{ opacity:.3; cursor: not-allowed; text-decoration: line-through; }
+
+  .log{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.6;
+    background: var(--bg-deep); border:1px solid var(--line); border-radius:8px;
+    padding:12px; overflow-y:auto; flex:1; min-height:180px; max-height: 46vh;
+  }
+  .log::-webkit-scrollbar{width:8px;}
+  .log::-webkit-scrollbar-thumb{background: var(--line); border-radius:4px;}
+  .log .empty{color: var(--ink-dim); font-style:italic;}
+  .entry{ margin-bottom:14px; padding-bottom:12px; border-bottom: 1px dashed var(--line); }
+  .entry:last-child{border-bottom:none; margin-bottom:0;}
+  .comment{color:#8fc4b9;}
+  .kw{color: var(--code-pink);}
+  .fn{color: var(--code-blue);}
+  .branch{padding:2px 0 2px 14px; border-left:2px solid transparent; margin:1px 0;}
+  .branch.active{border-left-color: var(--true-col); background: rgba(110,227,154,0.07); color: var(--ink);}
+  .branch.inactive{color: #7fa39b; text-decoration: line-through; text-decoration-color: rgba(127,163,155,0.5);}
+  .result-line{margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .badge{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:10.5px;
+    padding:2px 7px; border-radius:5px; letter-spacing:.03em;
+  }
+  .badge.true{ background: rgba(110,227,154,0.18); color: var(--true-col); }
+  .badge.false{ background: rgba(255,134,134,0.18); color: var(--false-col); }
+  .tally{color: var(--ink-dim); font-size:11px;}
+
+  .accusebar{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background: var(--bg-deep); border:1px solid var(--lamp-dim); border-radius:8px;
+    padding:10px 12px;
+  }
+  .accusebar span{font-size:12px; color: var(--ink-dim);}
+  .accusebar strong{color: var(--lamp); font-family:'Space Grotesk',sans-serif;}
+
+  /* WIN MODAL */
+  .overlay{
+    position:fixed; inset:0; background: rgba(6,14,12,0.82); backdrop-filter: blur(2px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+    opacity:0; pointer-events:none; transition: opacity .25s;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .modal{
+    background: var(--panel); border:1px solid var(--lamp-dim); border-radius:14px;
+    max-width:560px; width:100%; padding:26px 26px 22px; max-height:86vh; overflow-y:auto;
+  }
+  .modal .eyebrow{font-size:11px;}
+  .modal h2{font-family:'Space Grotesk',sans-serif; font-size:24px; margin:6px 0 10px;}
+  .modal p{color: var(--ink-dim); font-size:14px; line-height:1.6;}
+  .fn-block{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; background: var(--bg-deep);
+    border:1px solid var(--line); border-radius:8px; padding:14px; margin:14px 0; line-height:1.7;
+    overflow-x:auto;
+  }
+  .modal-actions{display:flex; gap:10px; margin-top:16px;}
+  .modal-actions button{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid var(--lamp-dim);
+  }
+  .modal-actions .primary{ background: var(--lamp); color: #1c1204; border-color: var(--lamp); }
+  .modal-actions .ghost{ background: transparent; color: var(--ink-dim); }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform: translateX(-50%) translateY(20px);
+    background: var(--panel); border:1px solid var(--false-col); color: var(--ink);
+    font-family:'Space Grotesk',sans-serif; font-size:13px; padding:10px 18px; border-radius:8px;
+    opacity:0; transition: all .25s; pointer-events:none; z-index:40;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Case File #SEL-01 · A Coding Whodunit</div>
+    <h1>The Selection Suspect</h1>
+    <p class="subtitle">Ten suspects. One is guilty — chosen at random and hidden even from you. Ask yes/no questions to narrow it down. Every question you ask is really a piece of code deciding what happens next.</p>
+
+    <details class="howto">
+      <summary>How this teaches "selection" in code</summary>
+      <div class="howto-body">
+        <b style="color:var(--ink)">Selection</b> just means your code picks a path based on something that is <code>True</code> or <code>False</code>:
+        <div id="howtoSample" style="margin:10px 0;"></div>
+        <div class="howto-grid">
+          <div class="howto-card"><b>1. Ask a question below</b><br>It's really a comparison like <code>hair_color == "red"</code>, which can only ever be <code>True</code> or <code>False</code>.</div>
+          <div class="howto-card"><b>2. Watch one branch light up</b><br>The <code>if</code> or the <code>else</code> runs — never both. The log shows exactly which one, and dims the road not taken.</div>
+        </div>
+      </div>
+    </details>
+  </header>
+
+  <div class="status">
+    <div class="status-left">
+      <div class="pill">Suspects remaining: <strong id="remCount">10</strong> / 10</div>
+      <div class="pill">Questions asked: <strong id="turnCount">0</strong></div>
+      <div class="mode-toggle" id="modeToggle">
+        <button class="mode-btn active" data-mode="python">🐍 Python</button>
+        <button class="mode-btn" data-mode="blocks">🧩 Blocks</button>
+      </div>
+    </div>
+    <button class="newcase" id="newCaseBtn">↻ New Case</button>
+  </div>
+
+  <div class="layout">
+    <div class="board-col">
+      <div class="reveal-banner" id="revealBanner"></div>
+      <div class="board" id="board"></div>
+
+      <details class="howto" id="flowchartDetails">
+        <summary>📊 See the flowchart for this case</summary>
+        <div class="howto-body">
+          <p style="margin:0 0 10px;">The exact chain of decisions your questions have built so far — the same <code>if / else</code> logic, drawn as a diagram. It grows as you ask more questions.</p>
+          <div id="flowchartHolder" style="overflow-x:auto;"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+      <div>
+        <h2>Ask a question</h2>
+        <p style="font-size:12px; color:var(--ink-dim); margin:6px 0 10px; line-height:1.5;">Only questions that could still split the suspects are shown — once everyone left shares an answer, that question disappears.</p>
+        <div class="qgroup-label" id="qBoolLabel" style="margin-top:0;">yes / no</div>
+        <div class="questions" id="qBool"></div>
+        <div class="qgroup-label" id="qHairLabel">hair color</div>
+        <div class="questions" id="qHair"></div>
+        <div class="qgroup-label" id="qEyesLabel">eye color</div>
+        <div class="questions" id="qEyes"></div>
+        <p id="noQuestions" style="display:none; font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:8px;">No more useful questions — time to make your accusation.</p>
+      </div>
+
+      <div class="accusebar" id="accuseBar" style="display:none;">
+        <span>Only <strong id="oneLeftName">one</strong> suspect left.</span>
+      </div>
+
+      <div>
+        <h2 style="margin-bottom:6px;">Detective's code log</h2>
+        <div class="log" id="log"><div class="empty"># no questions asked yet<br># click a question to see its if/else check</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const HAIR_HEX = { black:'#2e2a26', brown:'#6b4226', red:'#a8412c', blonde:'#d9b45c', gray:'#9aa0a6' };
+const EYE_HEX  = { brown:'#5b3a1e', blue:'#3b6ea5', green:'#3f7d4a' };
+
+const SUSPECTS = [
+  {id:'s1', name:'Nadia Cross',  skin:'#d8a878', hair:'black',  eyes:'brown', glasses:true,  hat:false, mustache:false, smiling:true,  freckles:false},
+  {id:'s2', name:'Otto Reyes',   skin:'#f0c39b', hair:'brown',  eyes:'green', glasses:false, hat:true,  mustache:true,  smiling:false, freckles:false},
+  {id:'s3', name:'Priya Vance',  skin:'#b97b4f', hair:'black',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:true,  freckles:true},
+  {id:'s4', name:'Desmond Ford', skin:'#f2d3ae', hair:'red',    eyes:'blue',  glasses:false, hat:false, mustache:true,  smiling:true,  freckles:false},
+  {id:'s5', name:'Lucia Marsh',  skin:'#f2d3ae', hair:'blonde', eyes:'blue',  glasses:true,  hat:false, mustache:false, smiling:false, freckles:true},
+  {id:'s6', name:'Boris Okafor', skin:'#8a5a34', hair:'black',  eyes:'brown', glasses:false, hat:true,  mustache:true,  smiling:true,  freckles:false},
+  {id:'s7', name:'Ingrid Salt',  skin:'#e8b98a', hair:'gray',   eyes:'green', glasses:false, hat:false, mustache:false, smiling:true,  freckles:true},
+  {id:'s8', name:'Milo Chen',    skin:'#e3b48d', hair:'brown',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:false, freckles:false},
+  {id:'s9', name:'Astrid Vale',  skin:'#f0c39b', hair:'red',    eyes:'green', glasses:false, hat:false, mustache:false, smiling:false, freckles:true},
+  {id:'s10',name:'Reggie Hale',  skin:'#b97b4f', hair:'gray',   eyes:'blue',  glasses:true,  hat:false, mustache:true,  smiling:true,  freckles:false},
+];
+
+const BOOL_QUESTIONS = [
+  {key:'glasses',  label:'Wears glasses?',    trueExpr:'wears_glasses == True',   falseExpr:'wears_glasses == False',  prop:'glasses', trueKeep:'keep suspects who wear glasses',    falseKeep:"keep suspects who don't wear glasses"},
+  {key:'hat',      label:'Wears a hat?',      trueExpr:'wears_hat == True',       falseExpr:'wears_hat == False',      prop:'hat',      trueKeep:'keep suspects who wear a hat',      falseKeep:"keep suspects who don't wear a hat"},
+  {key:'mustache', label:'Has a mustache?',   trueExpr:'has_mustache == True',    falseExpr:'has_mustache == False',   prop:'mustache', trueKeep:'keep suspects with a mustache',     falseKeep:"keep suspects without a mustache"},
+  {key:'smiling',  label:'Is smiling?',       trueExpr:'is_smiling == True',      falseExpr:'is_smiling == False',     prop:'smiling',  trueKeep:'keep suspects who are smiling',     falseKeep:"keep suspects who aren't smiling"},
+  {key:'freckles', label:'Has freckles?',     trueExpr:'has_freckles == True',    falseExpr:'has_freckles == False',   prop:'freckles', trueKeep:'keep suspects with freckles',       falseKeep:"keep suspects without freckles"},
+];
+const HAIR_QUESTIONS = Object.keys(HAIR_HEX).map(c => ({
+  key:'hair_'+c, label:`Hair color is "${c}"?`, prop:'hair', value:c,
+  trueExpr:`hair_color == "${c}"`, falseExpr:`hair_color != "${c}"`,
+  trueKeep:`keep suspects with ${c} hair`, falseKeep:`keep suspects without ${c} hair`
+}));
+const EYE_QUESTIONS = Object.keys(EYE_HEX).map(c => ({
+  key:'eyes_'+c, label:`Eye color is "${c}"?`, prop:'eyes', value:c,
+  trueExpr:`eye_color == "${c}"`, falseExpr:`eye_color != "${c}"`,
+  trueKeep:`keep suspects with ${c} eyes`, falseKeep:`keep suspects without ${c} eyes`
+}));
+
+function evalQ(q, suspect){
+  if (q.value !== undefined) return suspect[q.prop] === q.value;
+  return suspect[q.prop] === true;
+}
+
+/* ---------------- STATE ---------------- */
+let state = {};
+
+function newCase(){
+  state = {
+    secret: SUSPECTS[Math.floor(Math.random()*SUSPECTS.length)],
+    remaining: new Set(SUSPECTS.map(s=>s.id)),
+    asked: new Set(),
+    turn: 0,
+    log: [],
+    solved: false,
+    resolving: false,
+    wonSuspect: null,
+    history: []
+  };
+  rerenderLog();
+  renderHowtoSample();
+  renderFlowchart();
+  document.querySelector('.panel').classList.remove('resolving');
+  document.getElementById('board').classList.remove('resolving');
+  hideBanner();
+  renderAll();
+}
+
+/* ---------------- AVATAR SVG ---------------- */
+function avatarSVG(s){
+  const hairHex = HAIR_HEX[s.hair];
+  const eyeHex = EYE_HEX[s.eyes];
+  let parts = [];
+  parts.push(`<circle cx="50" cy="58" r="30" fill="${s.skin}"/>`);
+  // ears
+  parts.push(`<circle cx="20" cy="58" r="5" fill="${s.skin}"/><circle cx="80" cy="58" r="5" fill="${s.skin}"/>`);
+  // hair cap
+  parts.push(`<path d="M18,52 a32,32 0 0,1 64,0 q-3,-26 -32,-26 q-29,0 -32,26 z" fill="${hairHex}"/>`);
+  if (s.hair !== 'black' || true) {
+    // side hair strands
+    parts.push(`<path d="M18,50 q-2,14 2,24" stroke="${hairHex}" stroke-width="7" fill="none" stroke-linecap="round"/>`);
+    parts.push(`<path d="M82,50 q2,14 -2,24" stroke="${hairHex}" stroke-width="7" fill="none" stroke-linecap="round"/>`);
+  }
+  // eyebrows
+  parts.push(`<path d="M32,50 q6,-4 12,-1" stroke="${hairHex}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+  parts.push(`<path d="M56,49 q6,-3 12,1" stroke="${hairHex}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+  // eyes
+  parts.push(`<circle cx="38" cy="58" r="4" fill="${eyeHex}"/><circle cx="62" cy="58" r="4" fill="${eyeHex}"/>`);
+  parts.push(`<circle cx="39" cy="57" r="1" fill="#fff"/><circle cx="63" cy="57" r="1" fill="#fff"/>`);
+  // nose
+  parts.push(`<path d="M50,58 q3,7 0,10" stroke="rgba(0,0,0,0.25)" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+  // freckles
+  if (s.freckles){
+    const dots = [[32,66],[36,69],[64,66],[68,69],[34,72]];
+    dots.forEach(([x,y])=> parts.push(`<circle cx="${x}" cy="${y}" r="1.1" fill="rgba(0,0,0,0.3)"/>`));
+  }
+  // mustache
+  if (s.mustache){
+    parts.push(`<path d="M38,70 q12,6 24,0 q-4,5 -12,5 q-8,0 -12,-5 z" fill="${hairHex}"/>`);
+  }
+  // mouth
+  if (s.smiling){
+    parts.push(`<path d="M40,${s.mustache?78:74} q10,8 20,0" stroke="#7a4a3a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+  } else {
+    parts.push(`<path d="M41,${s.mustache?78:75} q9,1 18,0" stroke="#7a4a3a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+  }
+  // glasses
+  if (s.glasses){
+    parts.push(`<g stroke="#20302c" stroke-width="2.4" fill="rgba(255,255,255,0.06)">
+      <circle cx="38" cy="58" r="8.5"/><circle cx="62" cy="58" r="8.5"/>
+      <line x1="46.5" y1="58" x2="53.5" y2="58"/>
+      <line x1="29.5" y1="56" x2="24" y2="53"/>
+      <line x1="70.5" y1="56" x2="76" y2="53"/>
+    </g>`);
+  }
+  // hat
+  if (s.hat){
+    parts.push(`<path d="M14,38 q36,-22 72,0 q-4,-4 -36,-4 q-32,0 -36,4 z" fill="#233a45"/>`);
+    parts.push(`<rect x="26" y="20" width="48" height="18" rx="4" fill="#2e4a57"/>`);
+  }
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+}
+
+/* ---------------- RENDER ---------------- */
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  SUSPECTS.forEach(s=>{
+    const eliminated = !state.remaining.has(s.id);
+    const div = document.createElement('div');
+    div.className = 'suspect' + (eliminated ? ' eliminated':'');
+    div.innerHTML = `
+      <div class="avatar-wrap">
+        <div class="card-flip${eliminated ? ' flip-down':''}" id="flip-${s.id}">
+          <div class="card-face card-front">${avatarSVG(s)}</div>
+          <div class="card-face card-back${eliminated ? ' verdict-false':''}" id="back-${s.id}">${eliminated ? '<div class="verdict-icon">✕</div><div class="verdict-label">Ruled out</div>' : ''}</div>
+        </div>
+      </div>
+      <div class="name">${s.name}</div>
+      <button class="accuse-btn" data-id="${s.id}">Accuse →</button>
+    `;
+    if (!eliminated){
+      div.querySelector('.accuse-btn').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        accuse(s);
+      });
+    }
+    board.appendChild(div);
+  });
+}
+
+function isUseful(q){
+  // A question only earns a spot on screen if it could still split the
+  // remaining suspects. If everyone left already shares the same answer,
+  // asking it would be a wasted, non-selecting question.
+  const remainingArr = [...state.remaining].map(id => SUSPECTS.find(s=>s.id===id));
+  if (remainingArr.length <= 1) return false;
+  const first = evalQ(q, remainingArr[0]);
+  return remainingArr.some(s => evalQ(q, s) !== first);
+}
+
+function renderQuestions(){
+  const groups = [['qBool',BOOL_QUESTIONS],['qHair',HAIR_QUESTIONS],['qEyes',EYE_QUESTIONS]];
+  let anyVisible = false;
+  groups.forEach(([elId, qs])=>{
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    const visible = qs.filter(q => !state.asked.has(q.key) && isUseful(q));
+    document.getElementById(elId+'Label').style.display = visible.length ? '' : 'none';
+    visible.forEach(q=>{
+      anyVisible = true;
+      const btn = document.createElement('button');
+      btn.className = 'qbtn';
+      btn.textContent = q.label;
+      btn.disabled = state.solved;
+      btn.addEventListener('click', ()=> askQuestion(q));
+      el.appendChild(btn);
+    });
+  });
+  document.getElementById('noQuestions').style.display = (!anyVisible && !state.solved && state.remaining.size > 1) ? 'block' : 'none';
+}
+
+function renderStatus(){
+  document.getElementById('remCount').textContent = state.remaining.size;
+  document.getElementById('turnCount').textContent = state.turn;
+  const bar = document.getElementById('accuseBar');
+  if (state.remaining.size === 1 && !state.solved){
+    const id = [...state.remaining][0];
+    const s = SUSPECTS.find(x=>x.id===id);
+    document.getElementById('oneLeftName').textContent = s.name;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function renderAll(){
+  renderBoard();
+  renderQuestions();
+  renderStatus();
+}
+
+/* ---------------- GAME LOGIC ---------------- */
+const FLIP_START_DELAY = 550;   // ms after the answer appears before flips begin
+const FLIP_STAGGER = 100;       // ms between each suspect's flip starting
+const FLIP_DURATION = 650;      // ms for a single flip to complete
+const BANNER_LINGER = 250;      // ms the banner stays up after the last flip
+
+function askQuestion(q){
+  if (state.solved || state.resolving || state.asked.has(q.key)) return;
+  const localState = state;
+  localState.asked.add(q.key);
+  localState.resolving = true;
+  document.querySelector('.panel').classList.add('resolving');
+  document.getElementById('board').classList.add('resolving');
+
+  const answer = evalQ(q, localState.secret);
+  const orderedRemaining = SUSPECTS.filter(s => localState.remaining.has(s.id));
+  const before = orderedRemaining.length;
+
+  showBanner(q, answer, localState.turn + 1);
+
+  orderedRemaining.forEach((s, i) => {
+    const matches = evalQ(q, s) === answer;
+    const delay = FLIP_START_DELAY + i * FLIP_STAGGER;
+    setTimeout(() => {
+      if (state !== localState) return; // a new case started mid-animation
+      const flipEl = document.getElementById('flip-' + s.id);
+      const backEl = document.getElementById('back-' + s.id);
+      if (!flipEl || !backEl) return;
+      flipEl.classList.remove('flip-pulse', 'flip-down');
+      void flipEl.offsetWidth; // restart animation if reused
+      if (matches){
+        backEl.className = 'card-face card-back verdict-true';
+        backEl.innerHTML = '<div class="verdict-icon">✓</div><div class="verdict-label">Fits</div>';
+        flipEl.classList.add('flip-pulse');
+      } else {
+        backEl.className = 'card-face card-back verdict-false';
+        backEl.innerHTML = '<div class="verdict-icon">✕</div><div class="verdict-label">Ruled out</div>';
+        flipEl.classList.add('flip-down');
+        flipEl.closest('.suspect').classList.add('eliminated');
+      }
+    }, delay);
+  });
+
+  const totalTime = FLIP_START_DELAY + Math.max(0, before - 1) * FLIP_STAGGER + FLIP_DURATION + BANNER_LINGER;
+
+  setTimeout(() => {
+    if (state !== localState) return;
+    orderedRemaining.forEach(s => {
+      if (evalQ(q, s) !== answer) localState.remaining.delete(s.id);
+    });
+    const after = localState.remaining.size;
+    localState.turn++;
+    const historyEntry = { q, answer, before, after, turn: localState.turn };
+    localState.history.push(historyEntry);
+    appendLogEntry(historyEntry);
+    localState.resolving = false;
+    hideBanner();
+    document.querySelector('.panel').classList.remove('resolving');
+    document.getElementById('board').classList.remove('resolving');
+    renderStatus();
+    renderQuestions();
+    renderFlowchart();
+  }, totalTime);
+}
+
+let codeMode = 'python';
+
+function ifElseBlocksHTML(trueExpr, trueLabel, falseLabel, activeTrue){
+  const ifClass = activeTrue === undefined ? '' : (activeTrue ? 'active' : 'inactive');
+  const elseClass = activeTrue === undefined ? '' : (activeTrue ? 'inactive' : 'active');
+  return `
+    <div class="blk-group">
+      <div class="blk-row"><span class="blk blk-if">if</span><span class="blk blk-bool">${trueExpr}</span></div>
+      <div class="blk-stack ${ifClass}"><span class="blk blk-action">${trueLabel}</span></div>
+      <div class="blk-row"><span class="blk blk-else">else</span></div>
+      <div class="blk-stack ${elseClass}"><span class="blk blk-action">${falseLabel}</span></div>
+    </div>
+  `;
+}
+
+function renderHowtoSample(){
+  const el = document.getElementById('howtoSample');
+  if (codeMode === 'python'){
+    el.innerHTML = `<div class="fn-block"><span class="kw">if</span> suspect.wears_glasses == <span class="fn">True</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># do this</span><br><span class="kw">else</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># do that instead</span></div>`;
+  } else {
+    el.innerHTML = `<div class="fn-block">${ifElseBlocksHTML('wears_glasses == True', 'do this', 'do that instead')}</div>`;
+  }
+}
+
+function setCodeMode(mode){
+  codeMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  renderHowtoSample();
+  rerenderLog();
+  renderFlowchart();
+  if (state.solved && state.wonSuspect) buildWinModal(state.wonSuspect);
+}
+document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setCodeMode(b.dataset.mode)));
+
+function rerenderLog(){
+  const log = document.getElementById('log');
+  log.innerHTML = '';
+  if (!state.history || state.history.length === 0){
+    log.innerHTML = '<div class="empty">No questions asked yet — click a question to see its if/else logic.</div>';
+    return;
+  }
+  state.history.forEach(h => appendLogEntry(h, true));
+}
+
+/* ---------------- FLOWCHART ---------------- */
+function fcEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fcTruncate(s, n){ return s.length > n ? s.slice(0, n-1) + '…' : s; }
+function fcWrap(text, maxChars){
+  const words = String(text).split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w=>{
+    if ((cur + ' ' + w).trim().length > maxChars){
+      if (cur) lines.push(cur.trim());
+      cur = w;
+    } else {
+      cur = (cur + ' ' + w).trim();
+    }
+  });
+  if (cur) lines.push(cur.trim());
+  return lines;
+}
+function fcEliminateDesc(q, answer){
+  const base = answer ? q.falseKeep : q.trueKeep; // the OTHER branch's kept group is who gets eliminated
+  return base.replace(/^keep\b/, 'Eliminate');
+}
+
+function fcStadium(cx, top, w, h, label, kind){
+  const x = cx - w/2;
+  const fill = kind === 'win' ? 'rgba(110,227,154,0.16)' : (kind === 'dashed' ? 'transparent' : 'var(--panel-2)');
+  const stroke = kind === 'win' ? 'var(--true-col)' : 'var(--lamp-dim)';
+  const textColor = kind === 'win' ? 'var(--true-col)' : 'var(--ink-dim)';
+  const dash = kind === 'dashed' ? ' stroke-dasharray="5,5"' : '';
+  return `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="${h/2}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"${dash}/>` +
+         `<text x="${cx}" y="${top+h/2+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${textColor}">${fcEsc(fcTruncate(label,30))}</text>`;
+}
+
+function fcDiamond(cx, top, w, h, label, codeText, blocksMode){
+  const cy = top + h/2;
+  const pts = `${cx},${top} ${cx+w/2},${cy} ${cx},${top+h} ${cx-w/2},${cy}`;
+  let codeLine;
+  if (blocksMode){
+    const pw = Math.min(w-30, fcTruncate(codeText,20).length*6.4+18);
+    codeLine = `<rect x="${cx-pw/2}" y="${cy+5}" width="${pw}" height="17" rx="8.5" fill="#3fae62"/>` +
+      `<text x="${cx}" y="${cy+17}" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff">${fcEsc(fcTruncate(codeText,20))}</text>`;
+  } else {
+    codeLine = `<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono',monospace" fill="var(--code-green)">${fcEsc(fcTruncate(codeText,24))}</text>`;
+  }
+  return `<polygon points="${pts}" fill="var(--panel-2)" stroke="var(--lamp)" stroke-width="1.5"/>` +
+         `<text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">${fcEsc(fcTruncate(label,22))}</text>` +
+         codeLine;
+}
+
+function fcDiamondSimple(cx, top, w, h, label){
+  const cy = top + h/2;
+  const pts = `${cx},${top} ${cx+w/2},${cy} ${cx},${top+h} ${cx-w/2},${cy}`;
+  const lines = fcWrap(label, 15);
+  const lineH = 13;
+  const totalH = lines.length * lineH;
+  let ty = cy - totalH/2 + lineH*0.8;
+  let text = '';
+  lines.forEach(line=>{
+    text += `<text x="${cx}" y="${ty}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${fcEsc(line)}</text>`;
+    ty += lineH;
+  });
+  return `<polygon points="${pts}" fill="var(--panel-2)" stroke="var(--lamp-dim)" stroke-width="1.5"/>${text}`;
+}
+
+/** Rectangle "process" box, vertically centered at centerY, sized to fit wrapped text. Returns geometry too. */
+function fcActionRectAt(x, centerY, w, text){
+  const lines = fcWrap(text, 22);
+  const lineH = 13;
+  const padV = 12;
+  const h = lines.length*lineH + padV;
+  const top = centerY - h/2;
+  let inner = `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="8" fill="#5c1a1d" stroke="var(--false-col)" stroke-width="1.2"/>`;
+  const totalTextH = lines.length*lineH;
+  let ty = centerY - totalTextH/2 + lineH*0.8;
+  lines.forEach(line=>{
+    inner += `<text x="${x+w/2}" y="${ty}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffe3e3">${fcEsc(line)}</text>`;
+    ty += lineH;
+  });
+  return { svg: inner, top, h, bottom: top + h, centerX: x + w/2 };
+}
+
+function fcTinyChip(x, cy, label, positive){
+  const w = label.length*6.2 + 14;
+  const h = 16;
+  const fill = positive ? 'rgba(110,227,154,0.18)' : 'rgba(255,134,134,0.18)';
+  const color = positive ? 'var(--true-col)' : 'var(--false-col)';
+  return `<rect x="${x}" y="${cy-h/2}" width="${w}" height="${h}" rx="8" fill="${fill}"/>` +
+         `<text x="${x+w/2}" y="${cy+4}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${color}">${fcEsc(label)}</text>`;
+}
+
+function fcConnectorDown(x, y1, y2, color, dashed){
+  const dash = dashed ? ' stroke-dasharray="4,4"' : '';
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2-8}" stroke="${color}" stroke-width="2"${dash}/>` +
+         `<polygon points="${x-6},${y2-8} ${x+6},${y2-8} ${x},${y2}" fill="${color}"/>`;
+}
+function fcConnectorRight(x1, y, x2, color){
+  return `<line x1="${x1}" y1="${y}" x2="${x2-8}" y2="${y}" stroke="${color}" stroke-width="2"/>` +
+         `<polygon points="${x2-8},${y-6} ${x2-8},${y+6} ${x2},${y}" fill="${color}"/>`;
+}
+/** Elbow line that "joins back" into the trunk from an off-to-the-side action box. */
+function fcMergeLine(fromX, fromY, toX, toY, color){
+  const midY = (fromY + toY) / 2;
+  return `<polyline points="${fromX},${fromY} ${fromX},${midY} ${toX},${midY} ${toX},${toY-8}" fill="none" stroke="${color}" stroke-width="2"/>` +
+         `<polygon points="${toX-6},${toY-8} ${toX+6},${toY-8} ${toX},${toY}" fill="${color}"/>`;
+}
+
+function buildFlowchartSVG(){
+  const W = 660;
+  const cx = 210;
+  const nodeW = 200, nodeH = 74;
+  const loopW = 190, loopH = 70;
+  const rectX = 380, rectW = 220;
+  const connLen = 30;
+  const topMargin = 20, bottomMargin = 20;
+  const steps = state.history;
+  const blocksMode = codeMode === 'blocks';
+
+  let svg = '';
+  let y = topMargin;
+
+  svg += fcStadium(cx, y, 200, 46, `Start — ${SUSPECTS.length} suspects`, 'plain');
+  y += 46;
+
+  if (steps.length === 0){
+    svg += fcConnectorDown(cx, y, y+connLen, 'var(--line)', true);
+    y += connLen;
+    svg += fcStadium(cx, y, 220, 44, 'Ask a question to begin', 'dashed');
+    y += 44 + bottomMargin;
+    return `<svg viewBox="0 0 ${W} ${y}" width="100%" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+  }
+
+  steps.forEach((h, idx) => {
+    const isLast = idx === steps.length - 1;
+
+    // connector into the condition diamond
+    svg += fcConnectorDown(cx, y, y+connLen, 'var(--line)');
+    y += connLen;
+
+    const diamondTop = y;
+    const diamondCenterY = diamondTop + nodeH/2;
+    svg += fcDiamond(cx, diamondTop, nodeW, nodeH, h.q.label, h.q.trueExpr, blocksMode);
+    y = diamondTop + nodeH;
+
+    // the actual elimination action for this step's real answer
+    const eliminateDesc = fcEliminateDesc(h.q, h.answer);
+    const rect = fcActionRectAt(rectX, diamondCenterY, rectW, eliminateDesc);
+    svg += fcConnectorRight(cx + nodeW/2, diamondCenterY, rectX, 'var(--false-col)');
+    svg += rect.svg;
+
+    // trunk continues down to the loop-check diamond
+    const loopTop = y + connLen;
+    svg += fcConnectorDown(cx, y, loopTop, 'var(--true-col)');
+    svg += fcTinyChip(cx + 10, y + connLen/2, h.answer ? 'True' : 'False', true);
+
+    // the eliminate box's result joins back into the same loop-check diamond
+    svg += fcMergeLine(rect.centerX, rect.bottom, cx, loopTop, 'var(--false-col)');
+
+    y = loopTop;
+    svg += fcDiamondSimple(cx, y, loopW, loopH, 'More than 1 suspect left?');
+    y += loopH;
+
+    if (!isLast){
+      svg += fcTinyChip(cx + 10, y + connLen/2, 'Yes', true);
+    } else {
+      const remaining = state.remaining.size;
+      if (state.solved && state.wonSuspect){
+        svg += fcConnectorDown(cx, y, y+connLen, 'var(--true-col)');
+        svg += fcTinyChip(cx + 10, y + connLen/2, 'No', false);
+        y += connLen;
+        svg += fcStadium(cx, y, 230, 50, `✓ It's ${state.wonSuspect.name}`, 'win');
+        y += 50;
+      } else if (remaining === 1){
+        svg += fcConnectorDown(cx, y, y+connLen, 'var(--true-col)');
+        svg += fcTinyChip(cx + 10, y + connLen/2, 'No', false);
+        y += connLen;
+        const id = [...state.remaining][0];
+        const s = SUSPECTS.find(x=>x.id===id);
+        svg += fcStadium(cx, y, 230, 50, `Ready to accuse ${s.name}`, 'plain');
+        y += 50;
+      } else {
+        svg += fcConnectorDown(cx, y, y+connLen, 'var(--true-col)', true);
+        svg += fcTinyChip(cx + 10, y + connLen/2, 'Yes', true);
+        y += connLen;
+        svg += fcStadium(cx, y, 230, 44, 'Ask the next question', 'dashed');
+        y += 44;
+      }
+    }
+  });
+
+  y += bottomMargin;
+  return `<svg viewBox="0 0 ${W} ${y}" width="100%" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+}
+
+function renderFlowchart(){
+  const holder = document.getElementById('flowchartHolder');
+  if (!holder) return;
+  holder.innerHTML = buildFlowchartSVG();
+}
+
+
+function showBanner(q, answer, turnNumber){
+  const banner = document.getElementById('revealBanner');
+  banner.className = 'reveal-banner show ' + (answer ? 'true' : 'false');
+  const codeHTML = codeMode === 'python'
+    ? `<div class="rb-code"><span class="kw">if</span> secret_suspect.<span class="fn">${q.trueExpr}</span>:</div>`
+    : `<div class="rb-code"><div class="blk-row"><span class="blk blk-if">if</span><span class="blk blk-bool">${q.trueExpr}</span></div></div>`;
+  banner.innerHTML = `
+    <div>
+      <div class="rb-eyebrow">Question ${turnNumber} · ${q.label}</div>
+      ${codeHTML}
+      <div class="rb-action">${answer ? q.trueKeep : q.falseKeep} — watch the board</div>
+    </div>
+    <div class="rb-answer">${answer ? 'True' : 'False'}</div>
+  `;
+}
+
+function hideBanner(){
+  const banner = document.getElementById('revealBanner');
+  banner.classList.remove('show');
+}
+
+function appendLogEntry(h, skipScroll){
+  const log = document.getElementById('log');
+  if (log.querySelector('.empty')) log.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'entry';
+  const codeHTML = codeMode === 'python'
+    ? `<div><span class="kw">if</span> secret_suspect.${h.q.trueExpr}:</div>
+       <div class="branch ${h.answer ? 'active':'inactive'}">${h.q.trueKeep}</div>
+       <div><span class="kw">else</span>:</div>
+       <div class="branch ${!h.answer ? 'active':'inactive'}">${h.q.falseKeep}</div>`
+    : ifElseBlocksHTML(h.q.trueExpr, h.q.trueKeep, h.q.falseKeep, h.answer);
+  div.innerHTML = `
+    <div class="comment"># Q${h.turn}: ${h.q.label}</div>
+    ${codeHTML}
+    <div class="result-line">
+      <span class="badge ${h.answer?'true':'false'}">${h.answer ? 'True':'False'}</span>
+      <span class="tally">→ ${h.before} suspects narrowed to ${h.after}</span>
+    </div>
+  `;
+  log.appendChild(div);
+  if (!skipScroll) log.scrollTop = log.scrollHeight;
+}
+
+function accuse(suspect){
+  if (state.solved || state.resolving) return;
+  if (suspect.id === state.secret.id){
+    winGame(suspect);
+  } else {
+    const card = [...document.querySelectorAll('.suspect')].find(c => c.querySelector('.accuse-btn')?.dataset.id === suspect.id);
+    if (card){ card.classList.add('shake'); setTimeout(()=>card.classList.remove('shake'), 400); }
+    showToast(`Not a match — ${suspect.name} doesn't fit the evidence yet.`);
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+function winGame(suspect){
+  state.solved = true;
+  state.wonSuspect = suspect;
+  renderQuestions();
+  renderFlowchart();
+  buildWinModal(suspect);
+
+  const board = document.getElementById('board');
+  [...board.children].forEach(c=>{
+    if (c.querySelector('.accuse-btn')?.dataset.id === suspect.id) c.classList.add('won');
+  });
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function buildWinModal(suspect){
+  const parts = state.history.map(h => ({ expr: h.answer ? h.q.trueExpr : h.q.falseExpr }));
+
+  let fnHTML;
+  if (codeMode === 'python'){
+    const fnBody = parts.length
+      ? parts.map((p,i) => `s.${p.expr}` + (i < parts.length-1 ? ' <span class="kw">and</span>' : '')).join('<br>&nbsp;&nbsp;&nbsp;&nbsp;')
+      : '<span class="kw">True</span>  <span class="comment"># no questions were asked</span>';
+    fnHTML = `<div class="fn-block"><span class="kw" style="color:var(--code-pink)">def</span> <span class="fn" style="color:var(--code-blue)">is_suspect</span>(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw" style="color:var(--code-pink)">return</span> (<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${fnBody}<br>&nbsp;&nbsp;&nbsp;&nbsp;)</div>`;
+  } else {
+    const pills = parts.length
+      ? parts.map(p => `<span class="blk blk-bool">${p.expr}</span>`).join('')
+      : `<span class="blk blk-bool">True</span>`;
+    fnHTML = `<div class="fn-block">
+      <div class="blk-row"><span class="blk blk-action" style="background:#2e4a57;">is_suspect(s)</span></div>
+      <div class="blk-row"><span class="blk blk-and">AND — all must be true</span></div>
+      <div class="blk-stack active" style="margin-left:18px;">${pills}</div>
+    </div>`;
+  }
+
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="eyebrow" style="color:var(--true-col)">Case Closed</div>
+    <h2>It was ${suspect.name}.</h2>
+    <p>You solved it in ${state.turn} question${state.turn===1?'':'s'}. Each one was a check that could only be <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code> or <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code>. Put together, they point to this suspect alone:</p>
+    ${fnHTML}
+    <p style="font-size:12.5px;">That's <b style="color:var(--ink)">selection</b>: instead of checking every suspect by hand, a chain of small <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code>/<code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code> questions did the choosing for you.</p>
+    <div class="modal-actions">
+      <button class="primary" id="modalNewCase">Start new case</button>
+      <button class="ghost" id="modalClose">Keep looking at the log</button>
+    </div>
+  `;
+  document.getElementById('modalNewCase').addEventListener('click', ()=>{ closeModal(); newCase(); });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+document.getElementById('overlay').addEventListener('click', (e)=>{
+  if (e.target.id === 'overlay') closeModal();
+});
+document.getElementById('newCaseBtn').addEventListener('click', ()=>{ closeModal(); newCase(); });
+
+newCase();
+</script>
+</body>
+</html>
