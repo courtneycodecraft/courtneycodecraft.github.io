@@ -131,34 +131,39 @@
   @media (max-width: 920px){ .layout{grid-template-columns: 1fr;} }
   .board-col{ display:flex; flex-direction:column; gap:14px; }
 
-  /* REVEAL BANNER */
-  .reveal-banner{
+  /* REVEAL STACK */
+  .reveal-stack{
+    display:flex; flex-direction:column; gap:8px;
+    max-height:340px; overflow-y:auto; padding-right:4px; margin-right:-4px;
+  }
+  .reveal-stack::-webkit-scrollbar{width:8px;}
+  .reveal-stack::-webkit-scrollbar-thumb{background: var(--line); border-radius:4px;}
+  .reveal-entry{
     display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
     padding:14px 18px; border-radius:10px; background: var(--panel); border:1px solid var(--line);
-    opacity:0; transform: translateY(-10px) scale(0.98); pointer-events:none;
-    transition: opacity .22s ease, transform .22s ease, border-color .22s ease, max-height .3s ease, padding .25s ease, border-width .25s ease;
-    max-height:0; overflow:hidden; padding-top:0; padding-bottom:0; border-width:0;
+    transition: opacity .3s ease, transform .3s ease, padding .3s ease;
   }
-  .reveal-banner.show{
-    opacity:1; transform: translateY(0) scale(1); max-height:140px;
-    padding:14px 18px; border-width:1px;
-  }
-  .reveal-banner.true{ border-color: var(--true-col); }
-  .reveal-banner.false{ border-color: var(--false-col); }
-  .reveal-banner .rb-eyebrow{
+  .reveal-entry.true{ border-color: var(--true-col); }
+  .reveal-entry.false{ border-color: var(--false-col); }
+  .reveal-entry.compact{ padding:8px 14px; }
+  .reveal-entry.compact .rb-action{ display:none; }
+  .reveal-entry.compact .rb-eyebrow{ font-size:9.5px; margin-bottom:2px; }
+  .reveal-entry.compact .rb-code{ font-size:11.5px; }
+  .reveal-entry.compact .rb-answer{ font-size:14px; padding:3px 10px; border-radius:7px; }
+  .reveal-entry .rb-eyebrow{
     font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
     color: var(--ink-dim); margin-bottom:4px;
   }
-  .reveal-banner .rb-code{ font-family:'JetBrains Mono',monospace; font-size:13.5px; color: var(--ink); }
-  .reveal-banner .rb-code .kw{color: var(--code-pink);}
-  .reveal-banner .rb-code .fn{color: var(--code-blue);}
-  .reveal-banner .rb-action{ font-size:12.5px; color: var(--ink-dim); margin-top:3px; }
-  .reveal-banner .rb-answer{
+  .reveal-entry .rb-code{ font-family:'JetBrains Mono',monospace; font-size:13.5px; color: var(--ink); }
+  .reveal-entry .rb-code .kw{color: var(--code-pink);}
+  .reveal-entry .rb-code .fn{color: var(--code-blue);}
+  .reveal-entry .rb-action{ font-size:12.5px; color: var(--ink-dim); margin-top:3px; }
+  .reveal-entry .rb-answer{
     flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px;
     letter-spacing:.02em; padding:6px 18px; border-radius:9px;
   }
-  .reveal-banner.true .rb-answer{ color:#0d2b1c; background: var(--true-col); }
-  .reveal-banner.false .rb-answer{ color:#3a0d0d; background: var(--false-col); }
+  .reveal-entry.true .rb-answer{ color:#0d2b1c; background: var(--true-col); }
+  .reveal-entry.false .rb-answer{ color:#3a0d0d; background: var(--false-col); }
 
   /* BOARD */
   .board{
@@ -355,7 +360,7 @@
 
   <div class="layout">
     <div class="board-col">
-      <div class="reveal-banner" id="revealBanner"></div>
+      <div class="reveal-stack" id="revealStack"></div>
       <div class="board" id="board"></div>
 
       <details class="howto" id="flowchartDetails">
@@ -371,7 +376,7 @@
       <div>
         <h2>Ask a question</h2>
         <p style="font-size:12px; color:var(--ink-dim); margin:6px 0 10px; line-height:1.5;">Only questions that could still split the suspects are shown — once everyone left shares an answer, that question disappears.</p>
-        <div class="qgroup-label" id="qBoolLabel" style="margin-top:0;">yes / no</div>
+        <div class="qgroup-label" id="qBoolLabel" style="margin-top:0;">features</div>
         <div class="questions" id="qBool"></div>
         <div class="qgroup-label" id="qHairLabel">hair color</div>
         <div class="questions" id="qHair"></div>
@@ -458,7 +463,7 @@ function newCase(){
   renderFlowchart();
   document.querySelector('.panel').classList.remove('resolving');
   document.getElementById('board').classList.remove('resolving');
-  hideBanner();
+  clearRevealStack();
   renderAll();
 }
 
@@ -614,7 +619,7 @@ function askQuestion(q){
   const orderedRemaining = SUSPECTS.filter(s => localState.remaining.has(s.id));
   const before = orderedRemaining.length;
 
-  showBanner(q, answer, localState.turn + 1);
+  addRevealEntry(q, answer, localState.turn + 1);
 
   orderedRemaining.forEach((s, i) => {
     const matches = evalQ(q, s) === answer;
@@ -652,7 +657,6 @@ function askQuestion(q){
     localState.history.push(historyEntry);
     appendLogEntry(historyEntry);
     localState.resolving = false;
-    hideBanner();
     document.querySelector('.panel').classList.remove('resolving');
     document.getElementById('board').classList.remove('resolving');
     renderStatus();
@@ -905,13 +909,20 @@ function renderFlowchart(){
 }
 
 
-function showBanner(q, answer, turnNumber){
-  const banner = document.getElementById('revealBanner');
-  banner.className = 'reveal-banner show ' + (answer ? 'true' : 'false');
+const REVEAL_TIERS = [1, 0.82, 0.62, 0.46, 0.34, 0.25];
+
+function addRevealEntry(q, answer, turnNumber){
+  const stack = document.getElementById('revealStack');
+  if (!stack) return;
+
+  const entry = document.createElement('div');
+  entry.className = 'reveal-entry ' + (answer ? 'true' : 'false');
+  entry.style.opacity = '0';
+  entry.style.transform = 'translateY(-10px) scale(0.98)';
   const codeHTML = codeMode === 'python'
     ? `<div class="rb-code"><span class="kw">if</span> secret_suspect.<span class="fn">${q.trueExpr}</span>:</div>`
     : `<div class="rb-code"><div class="blk-row"><span class="blk blk-if">if</span><span class="blk blk-bool">${q.trueExpr}</span></div></div>`;
-  banner.innerHTML = `
+  entry.innerHTML = `
     <div>
       <div class="rb-eyebrow">Question ${turnNumber} · ${q.label}</div>
       ${codeHTML}
@@ -919,11 +930,35 @@ function showBanner(q, answer, turnNumber){
     </div>
     <div class="rb-answer">${answer ? 'True' : 'False'}</div>
   `;
+  stack.insertBefore(entry, stack.firstChild);
+
+  void entry.offsetWidth; // commit the start state before animating in
+
+  requestAnimationFrame(() => {
+    entry.style.opacity = '';
+    entry.style.transform = '';
+    restackRevealAges();
+  });
+  stack.scrollTop = 0;
 }
 
-function hideBanner(){
-  const banner = document.getElementById('revealBanner');
-  banner.classList.remove('show');
+function restackRevealAges(){
+  const stack = document.getElementById('revealStack');
+  if (!stack) return;
+  [...stack.children].forEach((el, i) => {
+    if (i === 0){
+      el.style.opacity = '';
+      el.classList.remove('compact');
+    } else {
+      el.style.opacity = String(REVEAL_TIERS[Math.min(i, REVEAL_TIERS.length-1)]);
+      el.classList.add('compact');
+    }
+  });
+}
+
+function clearRevealStack(){
+  const stack = document.getElementById('revealStack');
+  if (stack) stack.innerHTML = '';
 }
 
 function appendLogEntry(h, skipScroll){
