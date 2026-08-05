@@ -376,7 +376,7 @@
       <div>
         <h2>Ask a question</h2>
         <p style="font-size:12px; color:var(--ink-dim); margin:6px 0 10px; line-height:1.5;">Only questions that could still split the suspects are shown — once everyone left shares an answer, that question disappears.</p>
-        <div class="qgroup-label" id="qBoolLabel" style="margin-top:0;">features</div>
+        <div class="qgroup-label" id="qBoolLabel" style="margin-top:0;">yes / no</div>
         <div class="questions" id="qBool"></div>
         <div class="qgroup-label" id="qHairLabel">hair color</div>
         <div class="questions" id="qHair"></div>
@@ -1023,17 +1023,16 @@ function buildWinModal(suspect){
 
   let fnHTML;
   if (codeMode === 'python'){
-    const fnBody = parts.length
-      ? parts.map((p,i) => `s.${p.expr}` + (i < parts.length-1 ? ' <span class="kw">and</span>' : '')).join('<br>&nbsp;&nbsp;&nbsp;&nbsp;')
+    const lines = parts.length
+      ? parts.map((p,i) => (i===0 ? 'secret_suspect.' : '&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">and</span> secret_suspect.') + p.expr).join('<br>')
       : '<span class="kw">True</span>  <span class="comment"># no questions were asked</span>';
-    fnHTML = `<div class="fn-block"><span class="kw" style="color:var(--code-pink)">def</span> <span class="fn" style="color:var(--code-blue)">is_suspect</span>(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw" style="color:var(--code-pink)">return</span> (<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${fnBody}<br>&nbsp;&nbsp;&nbsp;&nbsp;)</div>`;
+    fnHTML = `<div class="fn-block"><span class="kw">if</span> ${lines}:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span style="color:var(--code-green)">"It's ${fcEsc(suspect.name)}!"</span>)</div>`;
   } else {
     const pills = parts.length
       ? parts.map(p => `<span class="blk blk-bool">${p.expr}</span>`).join('')
       : `<span class="blk blk-bool">True</span>`;
     fnHTML = `<div class="fn-block">
-      <div class="blk-row"><span class="blk blk-action" style="background:#2e4a57;">is_suspect(s)</span></div>
-      <div class="blk-row"><span class="blk blk-and">AND — all must be true</span></div>
+      <div class="blk-row"><span class="blk blk-if">if</span><span class="blk blk-and">all of these are true</span></div>
       <div class="blk-stack active" style="margin-left:18px;">${pills}</div>
     </div>`;
   }
@@ -1042,9 +1041,9 @@ function buildWinModal(suspect){
   modal.innerHTML = `
     <div class="eyebrow" style="color:var(--true-col)">Case Closed</div>
     <h2>It was ${suspect.name}.</h2>
-    <p>You solved it in ${state.turn} question${state.turn===1?'':'s'}. Each one was a check that could only be <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code> or <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code>. Put together, they point to this suspect alone:</p>
+    <p>You solved it in ${state.turn} question${state.turn===1?'':'s'}. Each one was a check that could only be <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code> or <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code>. Join every answer together with <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">and</code>, and only this suspect matches all of them:</p>
     ${fnHTML}
-    <p style="font-size:12.5px;">That's <b style="color:var(--ink)">selection</b>: instead of checking every suspect by hand, a chain of small <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code>/<code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code> questions did the choosing for you.</p>
+    <p style="font-size:12.5px;">That's <b style="color:var(--ink)">selection</b>: still just one big <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">if</code>, made from every small <code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">True</code>/<code style="font-family:'JetBrains Mono',monospace;color:var(--code-green);">False</code> answer you collected along the way.</p>
     <div class="modal-actions">
       <button class="primary" id="modalNewCase">Start new case</button>
       <button class="ghost" id="modalClose">Keep looking at the log</button>
