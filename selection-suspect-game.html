@@ -33,6 +33,9 @@
       var(--bg);
     color: var(--ink);
     font-family: 'Work Sans', sans-serif;
+    font-variant-ligatures: none;
+    -webkit-font-feature-settings: "liga" 0, "calt" 0;
+    font-feature-settings: "liga" 0, "calt" 0;
     min-height:100vh;
     padding: 28px 20px 60px;
   }
@@ -105,6 +108,17 @@
   .mode-btn:hover{ color: var(--ink); }
   .mode-btn.active{ background: var(--lamp); color:#1c1204; }
 
+  .count-pill{
+    display:flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px;
+  }
+  .count-pill select{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px;
+    background: var(--bg-deep); color: var(--lamp); border:1px solid var(--lamp-dim);
+    border-radius:6px; padding:3px 6px; cursor:pointer;
+  }
+  .count-pill select:focus{ outline: 1px solid var(--lamp); }
+
   /* BLOCK-CODE VISUAL STYLE */
   .blk-group{ font-family:'Space Grotesk',sans-serif; }
   .blk-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:3px 0; }
@@ -154,7 +168,7 @@
     font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
     color: var(--ink-dim); margin-bottom:4px;
   }
-  .reveal-entry .rb-code{ font-family:'JetBrains Mono',monospace; font-size:13.5px; color: var(--ink); }
+  .reveal-entry .rb-code{ font-family:'JetBrains Mono',monospace; font-size:13.5px; color: var(--ink); font-variant-ligatures: none; }
   .reveal-entry .rb-code .kw{color: var(--code-pink);}
   .reveal-entry .rb-code .fn{color: var(--code-blue);}
   .reveal-entry .rb-action{ font-size:12.5px; color: var(--ink-dim); margin-top:3px; }
@@ -261,6 +275,7 @@
     font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.6;
     background: var(--bg-deep); border:1px solid var(--line); border-radius:8px;
     padding:12px; overflow-y:auto; flex:1; min-height:180px; max-height: 46vh;
+    font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
   }
   .log::-webkit-scrollbar{width:8px;}
   .log::-webkit-scrollbar-thumb{background: var(--line); border-radius:4px;}
@@ -307,7 +322,7 @@
   .fn-block{
     font-family:'JetBrains Mono',monospace; font-size:12.5px; background: var(--bg-deep);
     border:1px solid var(--line); border-radius:8px; padding:14px; margin:14px 0; line-height:1.7;
-    overflow-x:auto;
+    overflow-x:auto; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
   }
   .modal-actions{display:flex; gap:10px; margin-top:16px;}
   .modal-actions button{
@@ -348,12 +363,21 @@
 
   <div class="status">
     <div class="status-left">
-      <div class="pill">Suspects remaining: <strong id="remCount">10</strong> / 10</div>
+      <div class="pill">Suspects remaining: <strong id="remCount">10</strong> / <strong id="totalCount">10</strong></div>
       <div class="pill">Questions asked: <strong id="turnCount">0</strong></div>
       <div class="mode-toggle" id="modeToggle">
         <button class="mode-btn active" data-mode="python">🐍 Python</button>
         <button class="mode-btn" data-mode="blocks">🧩 Blocks</button>
       </div>
+      <label class="pill count-pill">
+        Suspects
+        <select id="suspectCountSelect">
+          <option value="6">6</option>
+          <option value="10" selected>10</option>
+          <option value="14">14</option>
+          <option value="18">18</option>
+        </select>
+      </label>
     </div>
     <button class="newcase" id="newCaseBtn">↻ New Case</button>
   </div>
@@ -407,18 +431,29 @@
 const HAIR_HEX = { black:'#2e2a26', brown:'#6b4226', red:'#a8412c', blonde:'#d9b45c', gray:'#9aa0a6' };
 const EYE_HEX  = { brown:'#5b3a1e', blue:'#3b6ea5', green:'#3f7d4a' };
 
-const SUSPECTS = [
-  {id:'s1', name:'Nadia Cross',  skin:'#d8a878', hair:'black',  eyes:'brown', glasses:true,  hat:false, mustache:false, smiling:true,  freckles:false},
-  {id:'s2', name:'Otto Reyes',   skin:'#f0c39b', hair:'brown',  eyes:'green', glasses:false, hat:true,  mustache:true,  smiling:false, freckles:false},
-  {id:'s3', name:'Priya Vance',  skin:'#b97b4f', hair:'black',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:true,  freckles:true},
-  {id:'s4', name:'Desmond Ford', skin:'#f2d3ae', hair:'red',    eyes:'blue',  glasses:false, hat:false, mustache:true,  smiling:true,  freckles:false},
-  {id:'s5', name:'Lucia Marsh',  skin:'#f2d3ae', hair:'blonde', eyes:'blue',  glasses:true,  hat:false, mustache:false, smiling:false, freckles:true},
-  {id:'s6', name:'Boris Okafor', skin:'#8a5a34', hair:'black',  eyes:'brown', glasses:false, hat:true,  mustache:true,  smiling:true,  freckles:false},
-  {id:'s7', name:'Ingrid Salt',  skin:'#e8b98a', hair:'gray',   eyes:'green', glasses:false, hat:false, mustache:false, smiling:true,  freckles:true},
-  {id:'s8', name:'Milo Chen',    skin:'#e3b48d', hair:'brown',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:false, freckles:false},
-  {id:'s9', name:'Astrid Vale',  skin:'#f0c39b', hair:'red',    eyes:'green', glasses:false, hat:false, mustache:false, smiling:false, freckles:true},
-  {id:'s10',name:'Reggie Hale',  skin:'#b97b4f', hair:'gray',   eyes:'blue',  glasses:true,  hat:false, mustache:true,  smiling:true,  freckles:false},
+const SUSPECT_POOL = [
+  {id:'s1', name:'Nadia Cross',   skin:'#d8a878', hair:'black',  eyes:'brown', glasses:true,  hat:false, mustache:false, smiling:true,  freckles:false},
+  {id:'s2', name:'Otto Reyes',    skin:'#f0c39b', hair:'brown',  eyes:'green', glasses:false, hat:true,  mustache:true,  smiling:false, freckles:false},
+  {id:'s3', name:'Priya Vance',   skin:'#b97b4f', hair:'black',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:true,  freckles:true},
+  {id:'s4', name:'Desmond Ford',  skin:'#f2d3ae', hair:'red',    eyes:'blue',  glasses:false, hat:false, mustache:true,  smiling:true,  freckles:false},
+  {id:'s5', name:'Lucia Marsh',   skin:'#f2d3ae', hair:'blonde', eyes:'blue',  glasses:true,  hat:false, mustache:false, smiling:false, freckles:true},
+  {id:'s6', name:'Boris Okafor',  skin:'#8a5a34', hair:'black',  eyes:'brown', glasses:false, hat:true,  mustache:true,  smiling:true,  freckles:false},
+  {id:'s7', name:'Ingrid Salt',   skin:'#e8b98a', hair:'gray',   eyes:'green', glasses:false, hat:false, mustache:false, smiling:true,  freckles:true},
+  {id:'s8', name:'Milo Chen',     skin:'#e3b48d', hair:'brown',  eyes:'brown', glasses:true,  hat:true,  mustache:false, smiling:false, freckles:false},
+  {id:'s9', name:'Astrid Vale',   skin:'#f0c39b', hair:'red',    eyes:'green', glasses:false, hat:false, mustache:false, smiling:false, freckles:true},
+  {id:'s10',name:'Reggie Hale',   skin:'#b97b4f', hair:'gray',   eyes:'blue',  glasses:true,  hat:false, mustache:true,  smiling:true,  freckles:false},
+  {id:'s11',name:'Soren Vega',    skin:'#e3b48d', hair:'black',  eyes:'green', glasses:false, hat:false, mustache:false, smiling:false, freckles:false},
+  {id:'s12',name:'Delphine Cho',  skin:'#b97b4f', hair:'brown',  eyes:'blue',  glasses:true,  hat:true,  mustache:true,  smiling:true,  freckles:true},
+  {id:'s13',name:'Hugo Marlowe',  skin:'#f0c39b', hair:'red',    eyes:'brown', glasses:false, hat:true,  mustache:false, smiling:false, freckles:true},
+  {id:'s14',name:'Winnie Draper', skin:'#f2d3ae', hair:'blonde', eyes:'green', glasses:true,  hat:false, mustache:true,  smiling:false, freckles:false},
+  {id:'s15',name:'Cassius Bell',  skin:'#8a5a34', hair:'gray',   eyes:'brown', glasses:false, hat:true,  mustache:true,  smiling:false, freckles:true},
+  {id:'s16',name:'Freya Lindqvist',skin:'#f2d3ae',hair:'red',    eyes:'blue',  glasses:true,  hat:true,  mustache:false, smiling:true,  freckles:false},
+  {id:'s17',name:'Tobias Renner', skin:'#d8a878', hair:'blonde', eyes:'brown', glasses:false, hat:false, mustache:true,  smiling:false, freckles:true},
+  {id:'s18',name:'Marisol Duarte',skin:'#e8b98a', hair:'brown',  eyes:'green', glasses:true,  hat:false, mustache:false, smiling:false, freckles:true},
 ];
+
+let SUSPECTS = SUSPECT_POOL.slice(0, 10);
+let SUSPECT_COUNT = 10;
 
 const BOOL_QUESTIONS = [
   {key:'glasses',  label:'Wears glasses?',    trueExpr:'wears_glasses == True',   falseExpr:'wears_glasses == False',  prop:'glasses', trueKeep:'keep suspects who wear glasses',    falseKeep:"keep suspects who don't wear glasses"},
@@ -473,15 +508,11 @@ function avatarSVG(s){
   const eyeHex = EYE_HEX[s.eyes];
   let parts = [];
   parts.push(`<circle cx="50" cy="58" r="30" fill="${s.skin}"/>`);
-  // ears
+  // hair: one continuous shape that domes over the top and tapers down the
+  // sides to about ear level, like real hair rather than a separate headband
+  parts.push(`<path d="M16,66 Q12,28 50,16 Q88,28 84,66 Q76,48 70,46 Q60,36 50,36 Q40,36 30,46 Q24,48 16,66 Z" fill="${hairHex}"/>`);
+  // ears (drawn after hair so they peek out from underneath it)
   parts.push(`<circle cx="20" cy="58" r="5" fill="${s.skin}"/><circle cx="80" cy="58" r="5" fill="${s.skin}"/>`);
-  // hair cap
-  parts.push(`<path d="M18,52 a32,32 0 0,1 64,0 q-3,-26 -32,-26 q-29,0 -32,26 z" fill="${hairHex}"/>`);
-  if (s.hair !== 'black' || true) {
-    // side hair strands
-    parts.push(`<path d="M18,50 q-2,14 2,24" stroke="${hairHex}" stroke-width="7" fill="none" stroke-linecap="round"/>`);
-    parts.push(`<path d="M82,50 q2,14 -2,24" stroke="${hairHex}" stroke-width="7" fill="none" stroke-linecap="round"/>`);
-  }
   // eyebrows
   parts.push(`<path d="M32,50 q6,-4 12,-1" stroke="${hairHex}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
   parts.push(`<path d="M56,49 q6,-3 12,1" stroke="${hairHex}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
@@ -583,6 +614,7 @@ function renderQuestions(){
 
 function renderStatus(){
   document.getElementById('remCount').textContent = state.remaining.size;
+  document.getElementById('totalCount').textContent = SUSPECTS.length;
   document.getElementById('turnCount').textContent = state.turn;
   const bar = document.getElementById('accuseBar');
   if (state.remaining.size === 1 && !state.solved){
@@ -751,7 +783,7 @@ function fcDiamond(cx, top, w, h, label, codeText, blocksMode){
     codeLine = `<rect x="${cx-pw/2}" y="${cy+5}" width="${pw}" height="17" rx="8.5" fill="#3fae62"/>` +
       `<text x="${cx}" y="${cy+17}" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff">${fcEsc(fcTruncate(codeText,20))}</text>`;
   } else {
-    codeLine = `<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono',monospace" fill="var(--code-green)">${fcEsc(fcTruncate(codeText,24))}</text>`;
+    codeLine = `<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono',monospace" style="font-variant-ligatures:none;" fill="var(--code-green)">${fcEsc(fcTruncate(codeText,24))}</text>`;
   }
   return `<polygon points="${pts}" fill="var(--panel-2)" stroke="var(--lamp)" stroke-width="1.5"/>` +
          `<text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">${fcEsc(fcTruncate(label,22))}</text>` +
@@ -1058,6 +1090,16 @@ document.getElementById('overlay').addEventListener('click', (e)=>{
   if (e.target.id === 'overlay') closeModal();
 });
 document.getElementById('newCaseBtn').addEventListener('click', ()=>{ closeModal(); newCase(); });
+
+function setSuspectCount(n){
+  SUSPECT_COUNT = n;
+  SUSPECTS = SUSPECT_POOL.slice(0, n);
+  closeModal();
+  newCase();
+}
+document.getElementById('suspectCountSelect').addEventListener('change', (e)=>{
+  setSuspectCount(parseInt(e.target.value, 10));
+});
 
 newCase();
 </script>
