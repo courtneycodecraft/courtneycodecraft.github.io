@@ -133,12 +133,12 @@
   .blk-if, .blk-else{ background:#d9852b; }
   .blk-bool{ background:#3fae62; border-radius:14px; padding:5px 13px; }
   .blk-bool::before{display:none;}
-  .blk-action{ background:#3b82c4; }
+  .blk-eliminate{ background:#7a2226; font-size:10.5px; }
   .blk-and{ background:#8a5fd6; border-radius:14px; padding:5px 13px; }
   .blk-and::before{display:none;}
   .blk-stack{ display:flex; flex-direction:column; gap:5px; margin:3px 0 3px 18px; }
-  .blk-stack.active .blk-action{ box-shadow: 0 0 0 2px var(--true-col); }
-  .blk-stack.inactive .blk-action{ background:#3a4750; color:#c7d3d6; text-decoration: line-through; }
+  .blk-stack.active .blk-eliminate{ box-shadow: 0 0 0 2px var(--false-col); }
+  .blk-stack.inactive .blk-eliminate{ background:#3a2b2c; color:#c7a9aa; text-decoration: line-through; }
 
   /* LAYOUT */
   .layout{display:grid; grid-template-columns: 1fr 380px; gap:20px; align-items:start;}
@@ -699,15 +699,15 @@ function askQuestion(q){
 
 let codeMode = 'python';
 
-function ifElseBlocksHTML(trueExpr, trueLabel, falseLabel, activeTrue){
+function ifElseBlocksHTML(trueExpr, trueEliminate, falseEliminate, activeTrue){
   const ifClass = activeTrue === undefined ? '' : (activeTrue ? 'active' : 'inactive');
   const elseClass = activeTrue === undefined ? '' : (activeTrue ? 'inactive' : 'active');
   return `
     <div class="blk-group">
       <div class="blk-row"><span class="blk blk-if">if</span><span class="blk blk-bool">${trueExpr}</span></div>
-      <div class="blk-stack ${ifClass}"><span class="blk blk-action">${trueLabel}</span></div>
+      <div class="blk-stack ${ifClass}"><span class="blk blk-eliminate">${trueEliminate}</span></div>
       <div class="blk-row"><span class="blk blk-else">else</span></div>
-      <div class="blk-stack ${elseClass}"><span class="blk blk-action">${falseLabel}</span></div>
+      <div class="blk-stack ${elseClass}"><span class="blk blk-eliminate">${falseEliminate}</span></div>
     </div>
   `;
 }
@@ -715,9 +715,9 @@ function ifElseBlocksHTML(trueExpr, trueLabel, falseLabel, activeTrue){
 function renderHowtoSample(){
   const el = document.getElementById('howtoSample');
   if (codeMode === 'python'){
-    el.innerHTML = `<div class="fn-block"><span class="kw">if</span> suspect.wears_glasses == <span class="fn">True</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># do this</span><br><span class="kw">else</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># do that instead</span></div>`;
+    el.innerHTML = `<div class="fn-block"><span class="kw">if</span> suspect.wears_glasses == <span class="fn">True</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># eliminate suspects who don't</span><br><span class="kw">else</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># eliminate suspects who do</span></div>`;
   } else {
-    el.innerHTML = `<div class="fn-block">${ifElseBlocksHTML('wears_glasses == True', 'do this', 'do that instead')}</div>`;
+    el.innerHTML = `<div class="fn-block">${ifElseBlocksHTML('wears_glasses == True', "eliminate suspects who don't", 'eliminate suspects who do')}</div>`;
   }
 }
 
@@ -759,9 +759,13 @@ function fcWrap(text, maxChars){
   if (cur) lines.push(cur.trim());
   return lines;
 }
-function fcEliminateDesc(q, answer){
-  const base = answer ? q.falseKeep : q.trueKeep; // the OTHER branch's kept group is who gets eliminated
-  return base.replace(/^keep\b/, 'Eliminate');
+function fcEliminateDescYes(q){
+  // If the condition is Yes/True, kept = matches True, so eliminate the complement.
+  return q.falseKeep.replace(/^keep\b/, 'Eliminate');
+}
+function fcEliminateDescNo(q){
+  // If the condition is No/False, kept = matches False, so eliminate the complement.
+  return q.trueKeep.replace(/^keep\b/, 'Eliminate');
 }
 
 function fcStadium(cx, top, w, h, label, kind){
@@ -806,20 +810,37 @@ function fcDiamondSimple(cx, top, w, h, label){
 }
 
 /** Rectangle "process" box, vertically centered at centerY, sized to fit wrapped text. Returns geometry too. */
-function fcActionRectAt(x, centerY, w, text){
-  const lines = fcWrap(text, 22);
+function fcActionRectAt(x, centerY, w, text, taken){
+  const lines = fcWrap(text, 20);
   const lineH = 13;
   const padV = 12;
   const h = lines.length*lineH + padV;
   const top = centerY - h/2;
-  let inner = `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="8" fill="#5c1a1d" stroke="var(--false-col)" stroke-width="1.2"/>`;
+  const fill = taken ? '#5c1a1d' : 'rgba(92,26,29,0.25)';
+  const stroke = taken ? 'var(--false-col)' : 'var(--line)';
+  const textColor = taken ? '#ffe3e3' : '#8fa39e';
+  const dash = taken ? '' : ' stroke-dasharray="4,4"';
+  let inner = `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.2"${dash}/>`;
   const totalTextH = lines.length*lineH;
   let ty = centerY - totalTextH/2 + lineH*0.8;
   lines.forEach(line=>{
-    inner += `<text x="${x+w/2}" y="${ty}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffe3e3">${fcEsc(line)}</text>`;
+    inner += `<text x="${x+w/2}" y="${ty}" text-anchor="middle" font-size="10" font-weight="700" fill="${textColor}">${fcEsc(line)}</text>`;
     ty += lineH;
   });
   return { svg: inner, top, h, bottom: top + h, centerX: x + w/2 };
+}
+
+/** Arrow between any two points (used for the diagonal Yes/No branches off a diamond). */
+function fcArrow(x1, y1, x2, y2, color, dashed){
+  const dash = dashed ? ' stroke-dasharray="4,4"' : '';
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy) || 1;
+  const ux = dx/len, uy = dy/len;
+  const backX = x2 - ux*8, backY = y2 - uy*8;
+  const leftX = backX - uy*6, leftY = backY + ux*6;
+  const rightX = backX + uy*6, rightY = backY - ux*6;
+  return `<line x1="${x1}" y1="${y1}" x2="${backX}" y2="${backY}" stroke="${color}" stroke-width="2"${dash}/>` +
+         `<polygon points="${leftX},${leftY} ${rightX},${rightY} ${x2},${y2}" fill="${color}"/>`;
 }
 
 function fcTinyChip(x, cy, label, positive){
@@ -848,11 +869,13 @@ function fcMergeLine(fromX, fromY, toX, toY, color){
 }
 
 function buildFlowchartSVG(){
-  const W = 660;
-  const cx = 210;
+  const W = 520;
+  const cx = 260;
   const nodeW = 200, nodeH = 74;
   const loopW = 190, loopH = 70;
-  const rectX = 380, rectW = 220;
+  const branchX = 130;        // horizontal offset of each Yes/No action box from center
+  const boxW = 150;
+  const branchDrop = 42;      // vertical drop from diamond bottom to the branch boxes
   const connLen = 30;
   const topMargin = 20, bottomMargin = 20;
   const steps = state.history;
@@ -880,23 +903,32 @@ function buildFlowchartSVG(){
     y += connLen;
 
     const diamondTop = y;
-    const diamondCenterY = diamondTop + nodeH/2;
     svg += fcDiamond(cx, diamondTop, nodeW, nodeH, h.q.label, h.q.trueExpr, blocksMode);
-    y = diamondTop + nodeH;
+    const diamondBottom = diamondTop + nodeH;
 
-    // the actual elimination action for this step's real answer
-    const eliminateDesc = fcEliminateDesc(h.q, h.answer);
-    const rect = fcActionRectAt(rectX, diamondCenterY, rectW, eliminateDesc);
-    svg += fcConnectorRight(cx + nodeW/2, diamondCenterY, rectX, 'var(--false-col)');
-    svg += rect.svg;
+    // Every diamond always has a fixed Yes branch and No branch — the wording
+    // never depends on what actually happened, only on which branch this is.
+    const yesTaken = h.answer === true;
+    const yesDesc = fcEliminateDescYes(h.q);
+    const noDesc = fcEliminateDescNo(h.q);
 
-    // trunk continues down to the loop-check diamond
-    const loopTop = y + connLen;
-    svg += fcConnectorDown(cx, y, loopTop, 'var(--true-col)');
-    svg += fcTinyChip(cx + 10, y + connLen/2, h.answer ? 'True' : 'False', true);
+    const leftX = cx - branchX, rightX = cx + branchX;
+    const branchY = diamondBottom + branchDrop;
 
-    // the eliminate box's result joins back into the same loop-check diamond
-    svg += fcMergeLine(rect.centerX, rect.bottom, cx, loopTop, 'var(--false-col)');
+    svg += fcArrow(cx, diamondBottom, leftX, branchY - 4, yesTaken ? 'var(--true-col)' : 'var(--line)', !yesTaken);
+    svg += fcArrow(cx, diamondBottom, rightX, branchY - 4, !yesTaken ? 'var(--true-col)' : 'var(--line)', yesTaken);
+    svg += fcTinyChip(leftX - 34, diamondBottom + 16, 'Yes', yesTaken);
+    svg += fcTinyChip(rightX + 6, diamondBottom + 16, 'No', !yesTaken);
+
+    const leftBox = fcActionRectAt(leftX - boxW/2, branchY + 30, boxW, yesDesc, yesTaken);
+    const rightBox = fcActionRectAt(rightX - boxW/2, branchY + 30, boxW, noDesc, !yesTaken);
+    svg += leftBox.svg;
+    svg += rightBox.svg;
+
+    // both branches join back into the same loop-check diamond
+    const loopTop = Math.max(leftBox.bottom, rightBox.bottom) + connLen;
+    svg += fcMergeLine(leftBox.centerX, leftBox.bottom, cx, loopTop, yesTaken ? 'var(--true-col)' : 'var(--line)');
+    svg += fcMergeLine(rightBox.centerX, rightBox.bottom, cx, loopTop, !yesTaken ? 'var(--true-col)' : 'var(--line)');
 
     y = loopTop;
     svg += fcDiamondSimple(cx, y, loopW, loopH, 'More than 1 suspect left?');
@@ -958,7 +990,7 @@ function addRevealEntry(q, answer, turnNumber){
     <div>
       <div class="rb-eyebrow">Question ${turnNumber} · ${q.label}</div>
       ${codeHTML}
-      <div class="rb-action">${answer ? q.trueKeep : q.falseKeep} — watch the board</div>
+      <div class="rb-action">${answer ? fcEliminateDescYes(q) : fcEliminateDescNo(q)}</div>
     </div>
     <div class="rb-answer">${answer ? 'True' : 'False'}</div>
   `;
@@ -998,12 +1030,14 @@ function appendLogEntry(h, skipScroll){
   if (log.querySelector('.empty')) log.innerHTML = '';
   const div = document.createElement('div');
   div.className = 'entry';
+  const yesElim = fcEliminateDescYes(h.q);
+  const noElim = fcEliminateDescNo(h.q);
   const codeHTML = codeMode === 'python'
     ? `<div><span class="kw">if</span> secret_suspect.${h.q.trueExpr}:</div>
-       <div class="branch ${h.answer ? 'active':'inactive'}">${h.q.trueKeep}</div>
+       <div class="branch ${h.answer ? 'active':'inactive'}">${yesElim}</div>
        <div><span class="kw">else</span>:</div>
-       <div class="branch ${!h.answer ? 'active':'inactive'}">${h.q.falseKeep}</div>`
-    : ifElseBlocksHTML(h.q.trueExpr, h.q.trueKeep, h.q.falseKeep, h.answer);
+       <div class="branch ${!h.answer ? 'active':'inactive'}">${noElim}</div>`
+    : ifElseBlocksHTML(h.q.trueExpr, yesElim, noElim, h.answer);
   div.innerHTML = `
     <div class="comment"># Q${h.turn}: ${h.q.label}</div>
     ${codeHTML}
