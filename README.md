@@ -12,3 +12,5 @@
 [Variable Story Lab](variable-story-lab.html)
 
 [Guess Who - Selection Game](selection-suspect-game.html)
+
+[Angle Finder](angle-finder.html)
