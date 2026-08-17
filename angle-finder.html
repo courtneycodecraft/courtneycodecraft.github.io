@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angle Finder — turn angles for regular shapes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #15151a; --panel: #1d1d24; --panel-raised: #24242c; --line: #34343e;
+    --ink: #f2ede4; --ink-dim: #a6a2b3;
+    --shape: #8b93a7;
+    --lcd-bg: #1a1108; --lcd-ink: #ffcf6b; --focus: #ffcf6b;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0; background: radial-gradient(circle at 20% -10%, #1c1c24 0%, var(--bg) 55%);
+    color: var(--ink); font-family: 'IBM Plex Mono', ui-monospace, monospace; line-height:1.55; padding: 0 0 4rem;
+  }
+  :focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; }
+  .wrap{ max-width: 620px; margin: 0 auto; padding: 3rem 1.5rem 0; }
+  .eyebrow{ font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--lcd-ink); display:flex; align-items:center; gap:0.6rem; }
+  .eyebrow::before{ content:""; width:8px; height:8px; border-radius:50%; background: var(--lcd-ink); box-shadow: 0 0 8px var(--lcd-ink); }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0.5rem 0 0.6rem; letter-spacing: -0.01em; }
+  .lede{ color: var(--ink-dim); font-size: 0.98rem; margin: 0 0 2rem; }
+
+  .machine{
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    border: 1px solid var(--line); border-radius: 18px; padding: 1.8rem;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+
+  .sides-row{ display:flex; align-items:center; justify-content:center; gap:1rem; margin-bottom: 1.6rem; }
+  .stepper-btn{
+    width: 44px; height:44px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel-raised); color: var(--ink); font-size:1.3rem; cursor:pointer;
+  }
+  .stepper-btn:hover{ border-color: var(--lcd-ink); }
+  .stepper-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .sides-display{ text-align:center; min-width: 9rem; }
+  .sides-num{ font-family:'Space Grotesk', sans-serif; font-size: 2rem; font-weight:700; line-height:1; }
+  .sides-label{ font-size: 0.7rem; color: var(--ink-dim); text-transform:uppercase; letter-spacing:0.1em; margin-top:0.2rem; }
+
+  .result{
+    background: var(--lcd-bg); border: 1px solid #2b1c08; border-radius: 14px;
+    padding: 1.2rem; text-align:center; margin-bottom: 1.6rem; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+  }
+  .result-label{ font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #a87a2e; margin-bottom: 0.3rem; }
+  .result-value{ font-family:'Space Grotesk', sans-serif; font-size: 2.6rem; font-weight:700; color: var(--lcd-ink); text-shadow: 0 0 14px rgba(255,207,107,0.45); }
+  .result-sub{ font-size: 0.82rem; color: #a87a2e; margin-top: 0.3rem; }
+
+  .diagram-wrap{
+    background: #0d1420; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 1.4rem;
+  }
+  .diagram-wrap svg{ display:block; width:100%; height:auto; }
+
+  details.explain{ margin-bottom: 1.4rem; }
+  details.explain summary{
+    cursor:pointer; font-size: 0.85rem; color: var(--ink-dim); padding: 0.6rem 0.2rem;
+    list-style: none;
+  }
+  details.explain summary::-webkit-details-marker{ display:none; }
+  details.explain summary::before{ content:"▸ "; color: var(--lcd-ink); }
+  details.explain[open] summary::before{ content:"▾ "; }
+  details.explain .explain-body{
+    font-size: 0.85rem; color: var(--ink-dim); padding: 0 0.2rem 0.4rem;
+  }
+  details.explain code{ background: var(--panel-raised); padding: 0.05rem 0.4rem; border-radius:4px; color: var(--lcd-ink); }
+
+  .table-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:0.85rem; margin: 0 0 0.6rem; color: var(--ink-dim); text-transform:uppercase; letter-spacing:0.06em; }
+  table.ref{ width:100%; border-collapse: collapse; font-size: 0.85rem; }
+  table.ref th, table.ref td{ padding: 0.45rem 0.6rem; text-align:left; border-bottom: 1px solid var(--line); }
+  table.ref th{ color: var(--ink-dim); font-weight:600; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.06em; }
+  table.ref td.num{ color: var(--lcd-ink); font-weight:600; }
+  table.ref tr.active-row td{ background: rgba(255,207,107,0.1); }
+
+  footer{ max-width: 620px; margin: 2rem auto 0; padding: 0 1.5rem; color: var(--ink-dim); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">Track Log · Helper</div>
+  <h1>Angle Finder</h1>
+  <p class="lede">Pick a number of sides. This tells you the turn angle for that shape — no calculating needed.</p>
+
+  <div class="machine">
+    <div class="sides-row">
+      <button class="stepper-btn" id="down" aria-label="Fewer sides">−</button>
+      <div class="sides-display">
+        <div class="sides-num" id="sidesNum">6</div>
+        <div class="sides-label">sides</div>
+      </div>
+      <button class="stepper-btn" id="up" aria-label="More sides">+</button>
+    </div>
+
+    <div class="result">
+      <div class="result-label">Turn angle</div>
+      <div class="result-value" id="angleValue">60°</div>
+      <div class="result-sub" id="shapeName">Hexagon</div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg id="diagram" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <details class="explain">
+      <summary>How this number is worked out (only if you're curious)</summary>
+      <div class="explain-body" id="explainText"></div>
+    </details>
+
+    <div class="table-title">Quick lookup</div>
+    <table class="ref" id="refTable">
+      <thead><tr><th>Shape</th><th>Sides</th><th>Turn angle</th></tr></thead>
+      <tbody id="refBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>Runs entirely in your browser — nothing to download.</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  const NAMES = { 3:"Triangle", 4:"Square", 5:"Pentagon", 6:"Hexagon", 7:"Heptagon", 8:"Octagon", 9:"Nonagon", 10:"Decagon", 12:"Dodecagon" };
+  let sides = 6;
+
+  const sidesNum = document.getElementById("sidesNum");
+  const angleValue = document.getElementById("angleValue");
+  const shapeName = document.getElementById("shapeName");
+  const explainText = document.getElementById("explainText");
+  const diagram = document.getElementById("diagram");
+  const refBody = document.getElementById("refBody");
+  const downBtn = document.getElementById("down");
+  const upBtn = document.getElementById("up");
+
+  function angleFor(n){ return 360 / n; }
+  function angleDisplay(n){ const a = angleFor(n); return Number.isInteger(a) ? a + "°" : a.toFixed(1) + "°"; }
+  function nameFor(n){ return NAMES[n] || (n + "-sided shape"); }
+
+  function render(){
+    sidesNum.textContent = sides;
+    angleValue.textContent = angleDisplay(sides);
+    shapeName.textContent = nameFor(sides);
+    explainText.innerHTML = "A closed shape always turns a full 360° in total, split evenly across " + sides + " corners: 360 ÷ " + sides + " = <code>" + angleDisplay(sides) + "</code>. You never need to do this by hand here — the table above already did it.";
+    downBtn.disabled = sides <= 3;
+    upBtn.disabled = sides >= 20;
+    drawDiagram();
+    highlightRow();
+  }
+
+  downBtn.addEventListener("click", () => { if (sides > 3) { sides--; render(); } });
+  upBtn.addEventListener("click", () => { if (sides < 20) { sides++; render(); } });
+
+  function drawDiagram(){
+    const cx = 200, cy = 170, R = 110;
+    const angleDeg = angleFor(sides);
+    const pts = [];
+    for (let k = 0; k < sides; k++) {
+      const theta = (k * angleDeg - 90) * Math.PI / 180; // start pointing up
+      pts.push({ x: cx + R * Math.cos(theta), y: cy + R * Math.sin(theta) });
+    }
+
+    let svg = "";
+    // polygon outline
+    const poly = pts.map(p => p.x + "," + p.y).join(" ");
+    svg += '<polygon points="' + poly + '" fill="none" stroke="#8b93a7" stroke-width="3" stroke-linejoin="round"/>';
+
+    // exterior angle callout at vertex 1 (between edge 0->1 and edge 1->2)
+    if (sides >= 3) {
+      const p0 = pts[0], p1 = pts[1], p2 = pts[2 % sides];
+      const dir1 = { x: p1.x - p0.x, y: p1.y - p0.y };
+      const len1 = Math.hypot(dir1.x, dir1.y);
+      const unit1 = { x: dir1.x / len1, y: dir1.y / len1 };
+      const extLen = 46;
+      const extPoint = { x: p1.x + unit1.x * extLen, y: p1.y + unit1.y * extLen };
+
+      svg += '<line x1="' + p1.x + '" y1="' + p1.y + '" x2="' + extPoint.x + '" y2="' + extPoint.y + '" stroke="#6f6b7c" stroke-width="2" stroke-dasharray="4 4"/>';
+
+      const dir2 = { x: p2.x - p1.x, y: p2.y - p1.y };
+      const len2 = Math.hypot(dir2.x, dir2.y);
+      const unit2 = { x: dir2.x / len2, y: dir2.y / len2 };
+
+      const arcR = 26;
+      const a1 = Math.atan2(unit1.y, unit1.x);
+      const a2 = Math.atan2(unit2.y, unit2.x);
+      const arcStart = { x: p1.x + arcR * Math.cos(a1), y: p1.y + arcR * Math.sin(a1) };
+      const arcEnd = { x: p1.x + arcR * Math.cos(a2), y: p1.y + arcR * Math.sin(a2) };
+      const sweep = 1; // clockwise (matches turning right in screen coords)
+      svg += '<path d="M ' + arcStart.x + ' ' + arcStart.y + ' A ' + arcR + ' ' + arcR + ' 0 0 ' + sweep + ' ' + arcEnd.x + ' ' + arcEnd.y + '" fill="none" stroke="#ffcf6b" stroke-width="2.5"/>';
+
+      const midAngle = (a1 + a2) / 2 + (Math.abs(a2 - a1) > Math.PI ? Math.PI : 0);
+      const labelR = arcR + 22;
+      const labelX = p1.x + labelR * Math.cos(midAngle);
+      const labelY = p1.y + labelR * Math.sin(midAngle);
+      svg += '<text x="' + labelX + '" y="' + labelY + '" fill="#ffcf6b" font-size="15" font-family="IBM Plex Mono, monospace" font-weight="600" text-anchor="middle" dominant-baseline="middle">' + angleDisplay(sides) + '</text>';
+
+      // small dot marking the turn vertex
+      svg += '<circle cx="' + p1.x + '" cy="' + p1.y + '" r="4" fill="#ffcf6b"/>';
+    }
+
+    diagram.innerHTML = svg;
+  }
+
+  function buildTable(){
+    const rows = [3,4,5,6,7,8,9,10,12];
+    refBody.innerHTML = rows.map(n =>
+      '<tr data-sides="' + n + '"><td>' + nameFor(n) + '</td><td>' + n + '</td><td class="num">' + angleDisplay(n) + '</td></tr>'
+    ).join("");
+    Array.from(refBody.querySelectorAll("tr")).forEach(row => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", () => { sides = parseInt(row.dataset.sides, 10); render(); });
+    });
+  }
+
+  function highlightRow(){
+    Array.from(refBody.querySelectorAll("tr")).forEach(row => {
+      row.classList.toggle("active-row", parseInt(row.dataset.sides, 10) === sides);
+    });
+  }
+
+  buildTable();
+  render();
+})();
+</script>
+</body>
+</html>
